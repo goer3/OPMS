@@ -84,7 +84,8 @@ python manage.py createsuperuser
 
 ### 示例图片
 
-
+【1】添加记录：
+![addrecord](https://github.com/PythonTra1nee/OPMS/blob/master/display/addrecord.png)
 
 
 
