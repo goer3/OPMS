@@ -82,6 +82,8 @@ python manage.py createsuperuser
 
 【6】启动登录服务访问
 
+【7】启动webssh：python ........../webssh/main.py
+
 ### 示例图片
 
 ### 首页
