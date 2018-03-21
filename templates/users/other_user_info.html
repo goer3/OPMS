@@ -1,0 +1,246 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+<!----------------------------------------------------- 标题 ----------------------------------------------------------->
+{% block title %}
+  {{ user_info_list.nick_name }}的个人资料
+{% endblock title %}
+
+
+<!----------------------------------------------------- 内容主体 -------------------------------------------------------->
+{% block center_content %}
+  <div class="col">
+    <p style="padding-top: 2px;"></p>
+
+    <!-- 中间栏 -->
+    <div class="padder">
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+              <span>&nbsp;&nbsp;<span style="color: orangered;">{{ user_info_list.nick_name }}</span>的个人信息</span>
+            </div>
+          </div>
+
+          <div class="panel-body" style="text-align: center; height: 745px;">
+            <div class="col-sm-5">
+              <div class="col-sm-4"></div>
+              <div class="col-sm-8" style="margin-top: 30%">
+                <div class="ibox float-e-margins">
+                  <div class="ibox-content">
+                    <!------------------------------------- ------- 用户头像开始 ---------------------------------------->
+                    <img width="150" height="150" class="js-img-show img-circle"
+                         src="{{ MEDIA_URL }}{{ user_info_list.avatar }}" title="点击修改头像"/>
+
+                    <div>
+                      <label>
+                        <!----------------------------------------- 发送消息 ---------------------------------------->
+                        <a href="#SendMessage{{ user_info_list.id }}" data-toggle="modal" style="width: 150px;height: 30px;line-height: 30px;text-align: center; display:block;background: #363f44;border: 0;border-radius: 4px;color: white; margin-top: 20px;">发送消息</a>
+
+                        <!-- 个人信息框 -->
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1"
+                             id="SendMessage{{ user_info_list.id }}"
+                             class="modal fade" style="display: none;">
+                          <div class="modal-dialog" style="padding-top: 100px;">
+                            <div class="modal-content">
+                              <div class="modal-header" style="background-color: #003366;">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                                        style="color: #fff;">
+                                  x
+                                </button>
+                                <h4 class="modal-title" style="color: #fff; text-align: left;">发送信息给：<b
+                                        style="color: orangered">{{ user_info_list.nick_name }}</b></h4>
+                              </div>
+                              <form method="post" id="id_jsBigSendMsgForm">
+                                <textarea name="UserMessage" class="form-control no-border" rows="5" placeholder="消息内容 ..."></textarea>
+                                <input type="hidden" name="send_to" value="{{ user_info_list.id }}">
+                              </form>
+                              <div class="panel-footer bg-light lter">
+                                <ul class="nav nav-pills nav-sm">
+                                  <li><a href=""><i class="fa fa-camera text-muted"></i></a></li>
+                                  <li class="pull-right">
+                                    <input type="button" id="id_jsBigSendMsgBtn" style="width: 60px;" class="btn btn-info" value="发 送">
+                                  </li>
+                                  <li class="pull-right">
+                                    <input type="button" style="width: 60px;" data-dismiss="modal" class="btn btn-info" value="取 消">&nbsp;&nbsp;
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <!----------------------------------------------------- 用户资料开始 ---------------------------------------->
+            <div class="col-sm-7">
+              <div class="col-sm-8">
+                <div class="ibox float-e-margins">
+                  <div class="ibox-content" style="padding-top: 20px;">
+                    <form class="form-horizontal" enctype="multipart/form-data">
+
+                      <!-- 用户名 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_username">用户名</label>
+                        <div class="col-md-9">
+                          <input type="text" name="username" value="{{ user_info_list.username }}" class="form-control"
+                                 readonly="readonly">
+                        </div>
+                      </div>
+
+                      <!-- 名字 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_nick_name">姓名</label>
+                        <div class="col-md-9">
+                          <input type="text" name="nick_name" value="{{ user_info_list.nick_name }}"
+                                 class="form-control" readonly="readonly">
+                        </div>
+                      </div>
+
+                      <!-- 邮箱 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_email">邮箱</label>
+                        <div class="col-md-9">
+                          <input type="email" name="email" readonly="readonly" value="{{ user_info_list.email }}"
+                                 class="form-control">
+                        </div>
+                      </div>
+
+                      <!-- 地址 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_address">地址</label>
+                        <div class="col-md-9">
+                          <input type="text" name="address" value="{{ user_info_list.address }}" readonly="readonly"
+                                 class="form-control">
+                        </div>
+                      </div>
+
+                      <!-- 生日 -->
+                      <div class="form-group " id="date_5">
+                        <label for="id_date_expired" class="col-sm-2 control-label">生日</label>
+                        <div class="col-sm-9">
+                          <div class="input-group date">
+                            <span class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </span>
+                            <input name="birthday" type="text" class="form-control" readonly="readonly"
+                                   value="{{ user_info_list.birthday }}">
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- 性别 -->
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label">性别</label>
+                        <div class="col-sm-9">
+                          <input name="gender" type="text" class="form-control" readonly="readonly"
+                                 value="{{ user_info_list.get_gender_display }}">
+                        </div>
+                      </div>
+
+                      <!-- 手机 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_mobile">手机</label>
+                        <div class="col-md-9">
+                          <input type="text" name="mobile" readonly="readonly" class="form-control"
+                                 value="{{ user_info_list.mobile }}">
+                        </div>
+                      </div>
+
+                      <!-- QQ -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_qq">QQ</label>
+                        <div class="col-md-9">
+                          <input type="text" name="qq" readonly="readonly" class="form-control"
+                                 value="{{ user_info_list.qq }}">
+                        </div>
+                      </div>
+
+                      <!-- 微信 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_wechat">微信</label>
+                        <div class="col-md-9">
+                          <input type="text" name="wechat" readonly="readonly" class="form-control"
+                                 value="{{ user_info_list.wechat }}">
+                        </div>
+                      </div>
+
+                      <!-- 部门 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_department">部门</label>
+                        <div class="col-md-9">
+                          <input type="text" name="department" readonly="readonly"
+                                 value="{{ user_info_list.department.name }}" class="form-control">
+                        </div>
+                      </div>
+
+                      <!-- 职位 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_position">职位</label>
+                        <div class="col-md-9">
+                          <input type="text" name="position" readonly="readonly"
+                                 value="{{ user_info_list.position.name }}" class="form-control">
+                        </div>
+                      </div>
+
+                      <!-- 备注 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_desc">其他</label>
+                        <div class="col-md-9">
+                          <textarea name="desc" cols="40" rows="4" readonly="readonly" class="form-control"
+                                    id="id_desc">{{ user_info_list.desc }}</textarea>
+                        </div>
+                      </div>
+                    </form>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!----------------------------------------------------- 用户资料结束 ---------------------------------------->
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+{% block other_js %}
+  <script>
+      $(function () {
+          // 发送通知
+          $('#id_jsBigSendMsgBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'message:send_message' %}",
+                  data: $('#id_jsBigSendMsgForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+{% endblock other_js %}
+
+
+

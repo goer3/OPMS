@@ -1,0 +1,147 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}
+  主面板
+{% endblock title %}
+
+
+{% block other_css %}
+  <link rel="stylesheet" href="{% static 'charts/chart.css' %}">
+{% endblock other_css %}
+
+<!-- 中间内容主体 -->
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder">
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+              <span>&nbsp;&nbsp;主面板</span>
+            </div>
+          </div>
+          <div class="panel-body" style="height: 750px;">
+
+            <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+
+              <div class="row">
+                <div class="col-sm-12">
+
+                  <div class="col-sm-6 col-lg-3">
+                    <div class="panel">
+                      <div class="panel-body text-center bg-info">
+                        <i style="font-size: 50px; color: white;" class="fa fa-envelope"></i>
+                      </div>
+                      <div class="pad-all text-center" style="background-color: #F0F0F0; padding-top: 10px;">
+                        <p class="text-semibold text-lg mar-no text-main"><b style="color: #003366">消息数</b></p>
+                        <a href="{% url 'message:message_list' %}" class="h2 text-thin mar-no" style="color: #003366; padding-bottom: 10px;">{{ message_nums }}</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-sm-6 col-lg-3">
+                    <div class="panel">
+                      <div class="panel-body text-center bg-warning">
+                        <i style="font-size: 50px; color: white;" class="fa fa-chain-broken"></i>
+                      </div>
+                      <div class="pad-all text-center" style="background-color: #F0F0F0; padding-top: 10px;">
+                        <p class="text-semibold text-lg mar-no text-main"><b style="color: #003366">故障数</b></p>
+                        <a href="{% url 'record:record_list' %}" class="h2 text-thin mar-no" style="color: #003366; padding-bottom: 10px;">{{ record_nums }}</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-sm-6 col-lg-3">
+                    <div class="panel">
+                      <div class="panel-body text-center bg-success">
+                        <i style="font-size: 50px; color: white;" class="fa fa-file-word-o"></i>
+                      </div>
+                      <div class="pad-all text-center" style="background-color: #F0F0F0; padding-top: 10px;">
+                        <p class="text-semibold text-lg mar-no text-main"><b style="color: #003366">文档数</b></p>
+                        <a href="{% url 'project_mana:install_doc_list' %}" class="h2 text-thin mar-no" style="color: #003366; padding-bottom: 10px;">{{ doc_nums }}</a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-sm-6 col-lg-3">
+                    <div class="panel">
+                      <div class="panel-body text-center" style="background-color: #003366;">
+                        <i style="font-size: 50px; color: white;" class="fa fa-users"></i>
+                      </div>
+                      <div class="pad-all text-center" style="background-color: #F0F0F0; padding-top: 10px;">
+                        <p class="text-semibold text-lg mar-no text-main"><b style="color: #003366">用户数</b></p>
+                        <a href="{% url 'users:user_list' %}" class="h2 text-thin mar-no" style="color: #003366; padding-bottom: 10px;">{{ user_nums }}</a>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+
+                <div class="col-lg-12" style="margin-top: 10px;">
+                  <div class="col-sm-12">
+                    <div class="panel" style="background-color: #F0F0F0; height: 520px;">
+                      <div class="panel-heading">
+                        <h3 class="panel-title" style="font-weight: bolder">一年内故障数量</h3>
+                      </div>
+                      <div class="panel-body">
+                        <div class="row">
+                          <div class="col-lg-12 col-sm-12 col-md-12 col-xs-12">
+                            <div class="up_downs">
+                              <div class="left_up_downs pull-left">
+                                <p>100</p>
+                                <p>80</p>
+                                <p>60</p>
+                                <p>40</p>
+                                <p>20</p>
+                                <p>0</p>　
+                              </div>
+                              <div class="right_up_downs pull-left">
+                                <div class="right_up_downs_top">
+                                  <!--背景线-->
+                                  <ul class="list-unstyled right_top_ul">
+                                    <li></li>
+                                    <li></li>
+                                    <li></li>
+                                    <li></li>
+                                    <li></li>
+                                  </ul>
+                                  <!--柱形-->
+                                  <div class="right_pillar">
+                                    <ul class="list-unstyled right_pillar_ul" style="border-left: 2px solid #58666e;">
+                                      {% for nums in nums_list %}
+                                        <li>
+                                        <div class="right_pillar_for">
+                                          <div class="right_pillar_fill">
+                                            <div class="right_pillar_bg_1 text-center" style="height: {{ nums }}%; width: 30px; background-color: #003366; color: white; font-weight: bolder">{% ifnotequal nums 0 %}{{ nums }}{% endifnotequal %}</div>
+                                          </div>
+                                        </div>
+                                      </li>
+                                      {% endfor %}
+                                    </ul>
+                                  </div>
+                                </div>
+                                <div class="right_up_downs_bottom clearfix">
+                                  {% for each in y_m_list %}
+                                    <div class="pull-left text-center">{{ each }}</div>
+                                  {% endfor %}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}

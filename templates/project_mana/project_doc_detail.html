@@ -1,0 +1,241 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+{% load project_tags %}
+
+
+{% block title %}
+  文档详情
+{% endblock title %}
+
+
+{% block other_css %}
+  <script src="{% static 'ckeditor/ckeditor.js' %}"></script>
+  <link href="{% static 'ckeditor/plugins/codesnippet/lib/highlight/styles/monokai_sublime.css' %}" rel="stylesheet"/>
+  <script src="{% static 'ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js' %}"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <style>
+    pre {
+      padding: 0;
+      margin: 0 0 10px;
+      font-size: 13px;
+      background-color: #f5f5f5;
+      border: none;
+    }
+  </style>
+  <link rel="stylesheet" href="{% static 'record/down_style.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'bootstrap_date/bootstrap-select.css' %}" type="text/css">
+{% endblock other_css %}
+
+
+{% block web_content %}
+  <!-- 内容主体 -->
+  <div class="app-content">
+    <a href class="off-screen-toggle hide" data-toggle="class:off-screen" data-target=".app-aside"></a>
+    <div class="app-content-body fade-in-up">
+
+      <div class="hbox hbox-auto-xs hbox-auto-sm">
+
+        <div class="col">
+          <p style="padding-top: 2px;"></p>
+
+          <!-- 中间栏 -->
+          <div class="padder">
+            <!--  -->
+            <div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+                    <span>&nbsp;&nbsp;{{ doc_info.doc_title }}</span>
+                  </div>
+                </div>
+
+                <div class="panel-body" style="height: 745px;">
+
+                  <div class="row">
+                    <div class="col-sm-12" style="margin-bottom: 5px;">
+                      <a class="btn btn-sm btn-default btn-add" href="{% url 'project_mana:install_doc_list' %}">
+                        <i class="fa fa-reply"></i> 返回列表
+                      </a>
+                    </div>
+                  </div>
+
+                  <div class="form-horizontal">
+                    <div class="row">
+                      <div class="col-sm-12" style="overflow-y: auto; height: 630px;">
+                        <span class="form-control no-border"
+                              style="background: #E3E3E3; height: 630px;">{{ doc_info.doc_content|safe }}</span>
+                      </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-sm-12 text-center">
+                        <a data-toggle="modal" data-target="#editModal" data-backdrop='static'
+                           style="width: 100px;height: 25px;line-height: 25px;text-align: center; display:block;background: #003366;border: 0;border-radius: 4px;color: white; margin-top: 20px; margin-left: 48%">编辑</a>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右边栏 -->
+        <div class="col w-lg bg-light lter b-l bg-auto">
+          <div class="wrapper">
+            <div class="">
+              <h5 class="m-t-xs m-b-xs">分类归档</h5>
+              <hr>
+              <ul id="accordion" class="accordion" style="overflow-y: auto; height: 630px;">
+                {% for tag in tags %}
+                  <li>
+                    {% get_tag_doc tag.id as doc_list %}
+                    {% if doc_list %}
+                      <div class="link">
+                        {{ tag.name }}
+                        <b class="badge bg-info pull-right" style="margin-right: 30px;">{{ doc_list|length }}</b>
+                        <i class="fa fa-chevron-down"></i>
+                      </div>
+                      <ul class="submenu">
+                        {% for doc in doc_list %}
+                          <li>
+                            <a href="{% url 'project_mana:install_doc_detail' doc.id %}">【{{ forloop.counter }}】{{ doc.doc_title }}</a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+{% endblock web_content %}
+
+
+{% block other_js %}
+  <!-- 修改文档-->
+  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background-color: #003366; color: white;">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" style="color: white">&times;</span>
+          </button>
+          <h4 class="modal-title">修改文档</h4>
+        </div>
+        <div class="modal-body" style="height: 740px;">
+
+          <form method="post" class="form-horizontal" id="js_editDocForm">
+
+            <input type="hidden" name="doc_id" value="{{ doc_info.id }}">
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">标题</label>
+                <div class="col-md-10">
+                  <input type="text" name="doc_title" value="{{ doc_info.doc_title }}" maxlength="20" class="form-control" placeholder="输入文档标题" required="">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">标签</label>
+                <div class="col-md-10">
+                  <select id="id_select" name="doc_tag" class="selectpicker form-control" multiple=""
+                          data-live-search="true"
+                          style="display: none;">
+                    {% get_doc_tag doc_info.id as tag_list %}
+                    {% for tag in tags %}
+                      <option value="{{ tag.id }}" {% if tag.id in tag_list %}selected{% endif %}>{{ tag.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-12">
+              <textarea id="id_doc_area" name="doc_content" class="ckeditor" placeholder="运维文档">{{ doc_info.doc_content }}</textarea>
+            </div>
+
+            <!-- 设置编辑框高度 -->
+            <script>
+                CKEDITOR.replace('id_doc_area', {
+                    height: 550
+                });
+            </script>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+          <input type="button" id="js_editDocBtn"
+                 style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;"
+                 value="保存">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 修改文档提交 -->
+  <script>
+      $(function () {
+          //处理CKEDITOR的值
+          function CKupdate() {
+              for (instance in CKEDITOR.instances)
+                  CKEDITOR.instances[instance].updateElement();
+          }
+
+          // 提交表单
+          $('#js_editDocBtn').on('click', function () {
+              CKupdate();
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'project_mana:change_install_doc' doc_info.id %}",
+                  data: $('#js_editDocForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'project_mana:install_doc_detail' doc_info.id %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  <script src="{% static 'record/down_index.js' %}"></script>
+  <script src="{% static 'bootstrap_date/bootstrap-select.js' %}"></script>
+
+  <!-- 下拉选择框 -->
+  <script type="text/javascript">
+      $(window).on('load', function () {
+          $('.selectpicker').selectpicker({
+              'selectedText': 'cat'
+          });
+      })
+  </script>
+
+  <script>
+      $('#editModal').off('shown.bs.modal').on('shown.bs.modal', function (e) {
+          $(document).off('focusin.modal');
+      });
+  </script>
+
+{% endblock other_js %}

@@ -1,0 +1,591 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}
+  {{ content_title }}
+{% endblock title %}
+
+
+{% block other_css %}
+  <!-- 弹框详情css -->
+  <style>
+    .popover-title {
+      color: #003366;
+      font-weight: bolder;
+    }
+
+    .popover {
+      background-color: #104E8B;
+      color: white;
+    }
+  </style>
+{% endblock other_css %}
+
+
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder">
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;">
+              <a href="" style="font-size: 18px;">&nbsp;&nbsp;{{ content_title|safe }}</a>
+            </div>
+          </div>
+          <div class="panel-body" style="height: 745px;">
+
+            <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+              <div class="row">
+                <div class="col-sm-12">
+
+                  <a class="btn btn-sm btn-default btn-add" data-toggle="modal" data-target="#AddTaskModal"
+                     data-backdrop='static'>
+                    <i class="fa fa-plus"></i> 创建任务
+                  </a>
+
+                  <form class="navbar-form pull-right " role="search" style="margin-top: 0;">
+                    <div class="form-group">
+                      <span>共 <b style="color: orangered">{{ task_nums }}</b> 条&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                      <div class="input-group">
+                        <input type="text" name="keywords"
+                               class="form-control input-sm bg-light no-border rounded "
+                               placeholder="关键词搜索" style="width: 150px;">
+                        <span class="input-group-btn">
+                        <button type="submit" class="btn btn-sm bg-auto rounded"><i class="fa fa-search"></i></button>
+                      </span>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="row" style="overflow-y: auto; height: 630px;">
+                <div class="col-sm-12">
+
+                  <table class="table table-striped table-bordered table-hover dataTable no-footer" id="editable"
+                         role="grid">
+
+                    <!-- 标题行 -->
+                    <thead>
+                    <tr role="row">
+                      <th class="text-center" rowspan="1" colspan="1">ID</th>
+                      <th class="text-center" rowspan="1" colspan="1">指派给</th>
+                      <th class="text-center" rowspan="1" colspan="1">任务等级</th>
+                      <th class="text-center" rowspan="1" colspan="1">任务内容</th>
+                      <th class="text-center" rowspan="1" colspan="1">开始时间</th>
+                      <th class="text-center" rowspan="1" colspan="1">截止时间</th>
+                      <th class="text-center" rowspan="1" colspan="1">任务状态</th>
+                      <th class="text-center" rowspan="1" colspan="1">创建时间</th>
+                      <th class="text-center" rowspan="1" colspan="1">备注</th>
+                      <th class="text-center" rowspan="1" colspan="1">操作</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for task in tasks.object_list %}
+                      <tr class="gradeX odd" role="row">
+                        <td class="text-center" style="vertical-align : middle;">{{ forloop.counter }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ task.send_to.nick_name }}</td>
+                        {% ifequal task.task_level 1 %}
+                          <td class="text-center" style="background-color: red; vertical-align : middle;"><span
+                                  style="color: white;">紧急</span></td>
+                        {% endifequal %}
+                        {% ifequal task.task_level 2 %}
+                          <td class="text-center" style="vertical-align : middle;"><span>一般</span></td>
+                        {% endifequal %}
+                        {% ifequal task.task_level 3 %}
+                          <td class="text-center" style="background-color: yellow; vertical-align : middle;"><span
+                                  style="color: #003366;">不急</span></td>
+                        {% endifequal %}
+                        <td class="text-center" style="vertical-align : middle;">
+                          <button style="color: #104E8B; border: none; background:none" title="任务内容"
+                                  data-container="body" data-toggle="popover" data-trigger="hover"
+                                  data-placement="top" data-content="{{ task.content }}">
+                            {{ task.content|slice:'15' }}...
+                          </button>
+                        </td>
+                        <td class="text-center" style="vertical-align : middle;">{{ task.start_time }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ task.stop_time }}</td>
+                        {% ifequal task.status 0 %}
+                          <td class="text-center" style="vertical-align : middle;"><span
+                                  style="color: green;">已完结</span></td>
+                        {% endifequal %}
+                        {% ifequal task.status 1 %}
+                          <td class="text-center" style="vertical-align : middle;"><span
+                                  style="color: #0d8ddb;">进行中</span></td>
+                        {% endifequal %}
+                        {% ifequal task.status 2 %}
+                          <td class="text-center" style="vertical-align : middle;"><span
+                                  style="color: orangered;">已延期</span></td>
+                        {% endifequal %}
+                        {% ifequal task.status 3 %}
+                          <td class="text-center" style="vertical-align : middle;"><span style="color: red;">已终止</span>
+                          </td>
+                        {% endifequal %}
+                        <td class="text-center" style="vertical-align : middle;">{{ task.add_time }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          <button style="color: #104E8B; border: none; background:none" title="备注"
+                                  data-container="body" data-toggle="popover" data-trigger="hover"
+                                  data-placement="top" data-content="{{ task.ps }}">
+                            {{ task.ps }}...
+                          </button>
+                        </td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          <a class="btn btn-xs btn-primary" data-toggle="modal"
+                             data-target="#EditTaskModal{{ task.id }}"
+                             data-backdrop='static'>编辑</a>
+                          <a class="btn btn-xs btn-danger" data-toggle="modal"
+                             data-target="#StopTaskModal{{ task.id }}"
+                             data-backdrop='static'>终止</a>
+                          <a class="btn btn-xs btn-success" data-toggle="modal"
+                             data-target="#FinishTaskModal{{ task.id }}"
+                             data-backdrop='static'>完成</a>
+                        </td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td colspan="10" style="text-align: center;">暂无任务！</td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 页码 -->
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <ul class="pagination" style="margin-top: 0px;">
+                  <!-- 上一页 -->
+                  {% if tasks.has_previous %}
+                    <li class="long"><a href="?{{ tasks.previous_page_number.querystring }}">上一页</a></li>
+                  {% endif %}
+                  <!-- 页码 -->
+                  {% for page in tasks.pages %}
+                    {% if page %}
+                      {% ifequal page tasks.number %}
+                        <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                                class="sr-only">(current)</span></a></li>
+                      {% else %}
+                        <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                      {% endifequal %}
+                    {% else %}
+                      <li><a href="">...<span class="sr-only"></span></a></li>
+                    {% endif %}
+                  {% endfor %}
+                  <!-- 下一页 -->
+                  {% if tasks.has_next %}
+                    <li><a href="?{{ tasks.next_page_number.querystring }}">下一页<span class="sr-only"></span></a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+  <link rel="stylesheet" href="{% static 'bootstrap_date/bootstrap-select.css' %}" type="text/css">
+  <script src="{% static 'bootstrap_date/bootstrap-select.js' %}"></script>
+
+  <script src="{% static 'bootstrap_date/moment-with-locales.min.js' %}"></script>
+  <link href="{% static 'bootstrap_date/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+  <script src="{% static 'bootstrap_date/bootstrap-datetimepicker.min.js' %}"></script>
+
+  <!-- 添加任务 -->
+  <div class="modal inmodal" id="AddTaskModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" style="padding-top: 10%">
+      <div class="modal-content">
+        <div class="modal-header" style="min-height: 60px; background-color: #003366;">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                  style="margin-top: 8px; color: white;">x
+          </button>
+          <h4 class="control-label col-sm-3 col-lg-3" id="addModalLabel" style="color: white;">新增任务</h4>
+        </div>
+        <form class="form-horizontal" id="js_AddTaskForm">
+          <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">任务等级</label>
+              <div class="col-sm-8 col-lg-8">
+                <select name="task_level" class="selectpicker form-control" style="display: none;">
+                  <option value="1">紧急</option>
+                  <option value="2" selected>一般</option>
+                  <option value="3">不急</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">任务内容</label>
+              <div class="col-sm-8 col-lg-8">
+                <textarea class="form-control" rows="3" name="content" placeholder="输入任务内容"></textarea>
+              </div>
+            </div>
+
+            <div class="form-group ">
+              <label class="col-sm-3 col-lg-3 control-label">开始时间</label>
+              <div class="col-sm-8 col-lg-8">
+                <div class="input-group date" id='datetimepicker_add1'>
+                  <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                  <input name="start_time" type="text" class="form-control" value="">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group ">
+              <label class="col-sm-3 col-lg-3 control-label">截止时间</label>
+              <div class="col-sm-8 col-lg-8">
+                <div class="input-group date" id='datetimepicker_add2'>
+                  <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                  <input name="stop_time" type="text" class="form-control" value="">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">指派给</label>
+              <div class="col-sm-8 col-lg-8">
+                <select name="send_to" class="selectpicker form-control" style="display: none;">
+                  {% for user in user_list %}
+                    <option value="{{ user.id }}"
+                            {% ifequal user.id request.user.id %}selected{% endifequal %}>{{ user.nick_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">备注</label>
+              <div class="col-sm-8 col-lg-8">
+                <textarea class="form-control" name="ps" rows="3" placeholder="备注信息..."></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;"
+                      id="js_AddTaskBtn" formaction="">创建
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 下拉选择框 -->
+  <script type="text/javascript">
+      $(window).on('load', function () {
+          $('.selectpicker').selectpicker({
+              'selectedText': 'cat'
+          });
+      })
+  </script>
+
+  <!-- 添加记录时间选择器 -->
+  <script>
+      $('#datetimepicker_add1').datetimepicker({
+          format: 'YYYY-MM-DD HH:mm',
+          locale: moment.locale('zh-cn')
+      });
+
+      $('#datetimepicker_add2').datetimepicker({
+          format: 'YYYY-MM-DD HH:mm',
+          locale: moment.locale('zh-cn')
+      });
+  </script>
+
+  <!-- 记录详情 -->
+  <script>
+      $(function () {
+          $("[data-toggle='popover']").popover();
+      });
+  </script>
+
+  <!-- 添加任务提交 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#js_AddTaskBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'work_task:add_task' %}",
+                  data: $('#js_AddTaskForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'work_task:receive_task_list' %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.location.href = "{% url 'work_task:receive_task_list' %}";
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  {% for task in tasks.object_list %}
+    <!-- 编辑任务 -->
+    <div class="modal inmodal" id="EditTaskModal{{ task.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog" style="padding-top: 10%">
+        <div class="modal-content">
+          <div class="modal-header" style="min-height: 60px; background-color: #003366;">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                    style="margin-top: 8px; color: white;">x
+            </button>
+            <h4 class="control-label col-sm-3 col-lg-3" id="EditModalLabel" style="color: white;">修改任务</h4>
+          </div>
+          <form class="form-horizontal" id="js_ChangeTaskForm{{ task.id }}">
+            <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">任务等级</label>
+                <div class="col-sm-8 col-lg-8">
+                  <select name="task_level" class="selectpicker form-control" style="display: none;">
+                    <option value="1" {% ifequal task.task_level 1 %}selected{% endifequal %}>紧急</option>
+                    <option value="2" {% ifequal task.task_level 2 %}selected{% endifequal %}>一般</option>
+                    <option value="3" {% ifequal task.task_level 3 %}selected{% endifequal %}>不急</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">任务内容</label>
+                <div class="col-sm-8 col-lg-8">
+                  <textarea class="form-control" rows="3" name="content"
+                            placeholder="输入任务内容">{{ task.content }}</textarea>
+                </div>
+              </div>
+
+              <div class="form-group ">
+                <label class="col-sm-3 col-lg-3 control-label">开始时间</label>
+                <div class="col-sm-8 col-lg-8">
+                  <div class="input-group date" id='datetimepicker_add{{ task.id }}_1'>
+                  <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                    <input name="start_time" type="text" class="form-control"
+                           value="{{ task.start_time|date:'Y-m-d H:i' }}">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group ">
+                <label class="col-sm-3 col-lg-3 control-label">截止时间</label>
+                <div class="col-sm-8 col-lg-8">
+                  <div class="input-group date" id='datetimepicker_add{{ task.id }}_2'>
+                  <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                    <input name="stop_time" type="text" class="form-control"
+                           value="{{ task.stop_time|date:'Y-m-d H:i' }}">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">指派给</label>
+                <div class="col-sm-8 col-lg-8">
+                  <select name="send_to" class="selectpicker form-control" style="display: none;">
+                    {% for user in user_list %}
+                      <option value="{{ user.id }}"
+                              {% ifequal user.id task.send_to.id %}selected{% endifequal %}>{{ user.nick_name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">备注</label>
+                <div class="col-sm-8 col-lg-8">
+                  <textarea class="form-control" name="ps" rows="3" placeholder="备注信息...">{{ task.ps }}</textarea>
+                </div>
+              </div>
+
+              <div class="modal-footer">
+                <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;"
+                        id="js_ChangeTaskBtn{{ task.id }}" formaction="">修改
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 添加记录时间选择器 -->
+    <script>
+        $('#datetimepicker_add{{ task.id }}_1').datetimepicker({
+            format: 'YYYY-MM-DD HH:mm',
+            locale: moment.locale('zh-cn')
+        });
+
+        $('#datetimepicker_add{{ task.id }}_2').datetimepicker({
+            format: 'YYYY-MM-DD HH:mm',
+            locale: moment.locale('zh-cn')
+        });
+    </script>
+
+    <!-- 修改任务提交 -->
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_ChangeTaskBtn{{ task.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'work_task:change_task' task.id %}",
+                    data: $('#js_ChangeTaskForm{{ task.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'work_task:create_task_list' %}";
+                            window.alert(data.msg);
+                        } else if (data.status == 'fail') {
+                            window.location.href = "{% url 'work_task:create_task_list' %}";
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+
+    <!-- 终止 -->
+    <div class="modal fade" id="StopTaskModal{{ task.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm" style="padding-top: 10%">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: #003366; color: white;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+            <h4 class="modal-title">是否终止该任务？</h4>
+          </div>
+          <form class="form-horizontal" id="js_stopTaskForm{{ task.id }}">
+            <div class="modal-body" style="height: 50px;">
+              <div class="col-sm-6">
+                <input type="button" id="js_stopTaskBtn{{ task.id }}"
+                       style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;"
+                       value="确定">
+              </div>
+              <div class="col-sm-6">
+                <button style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;">
+                  取消
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 终止任务 -->
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_stopTaskBtn{{ task.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'work_task:create_user_stop_task' task.id %}",
+                    data: $('#js_stopTaskForm{{ task.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'work_task:create_task_list' %}";
+                        } else if (data.status == 'fail') {
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+
+    <!-- 完结 -->
+    <div class="modal fade" id="FinishTaskModal{{ task.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm" style="padding-top: 10%">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: #003366; color: white;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+            <h4 class="modal-title">是否完结该任务？</h4>
+          </div>
+          <form class="form-horizontal" id="js_finishTaskForm{{ task.id }}">
+            <div class="modal-body" style="height: 50px;">
+              <div class="col-sm-6">
+                <input type="button" id="js_finishTaskBtn{{ task.id }}"
+                       style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;"
+                       value="确定">
+              </div>
+              <div class="col-sm-6">
+                <button style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;">
+                  取消
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 完结任务 -->
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_finishTaskBtn{{ task.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'work_task:create_user_finish_task' task.id %}",
+                    data: $('#js_finishTaskForm{{ task.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'work_task:create_task_list' %}";
+                        } else if (data.status == 'fail') {
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+  {% endfor %}
+
+{% endblock other_js %}

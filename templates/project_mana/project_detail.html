@@ -1,0 +1,340 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+  项目详情
+{% endblock title %}
+
+{% block other_css %}
+  <script src="{% static 'ckeditor/ckeditor.js' %}"></script>
+  <link href="{% static 'ckeditor/plugins/codesnippet/lib/highlight/styles/monokai_sublime.css' %}" rel="stylesheet"/>
+  <script src="{% static 'ckeditor/plugins/codesnippet/lib/highlight/highlight.pack.js' %}"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <style>
+    pre {
+      padding: 0;
+      margin: 0 0 10px;
+      font-size: 13px;
+      background-color: #f5f5f5;
+      border: none;
+    }
+  </style>
+{% endblock other_css %}
+
+{% block center_content %}
+  <div class="col">
+    <p style="padding-top: 2px;"></p>
+
+    <!-- 中间栏 -->
+    <div class="padder">
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+              <span>&nbsp;&nbsp;{{ cate.name }} / {{ pro.name }} / 项目详情</span>
+            </div>
+          </div>
+
+          <div class="panel-body" style="height: 740px;">
+            <!-- 添加搜索栏 -->
+            <div class="row">
+              <div class="col-sm-12" style="margin-bottom: 5px; margin-left: 15px;">
+                <a href="{% url 'project_mana:project_list' cate.id %}" class="btn btn-sm btn-default">
+                  <i class="fa fa-reply"></i> 返回列表
+                </a>
+              </div>
+            </div>
+
+            <div class="form-horizontal">
+              <div class="col-sm-4">
+                <div class="panel-heading" style="background-color: #003366; color: white;">
+                  <h3 class="panel-title">项目信息</h3>
+                </div>
+                <div class="panel-body" style="height: 580px;border: #F0F0F0 solid 1px;">
+                  <div class="ibox-content" style="padding-top: 10px;">
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">项目名称</label>
+                      <div class="col-md-8">
+                        <input type="text" name="name" value="{{ pro.name }}" maxlength="20"
+                               class="form-control"
+                               placeholder="项目名称" readonly="readonly">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">发起者</label>
+                      <div class="col-md-8">
+                        <input type="text" name="name" value="{{ project_infos.ask_user }}" maxlength="20"
+                               class="form-control"
+                               placeholder="发起者" readonly="readonly">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">运维人员</label>
+                      <div class="col-md-8">
+                        <input type="text" name="name" value="{{ project_infos.op_user }}" maxlength="20"
+                               class="form-control"
+                               placeholder="运维人员" readonly="readonly">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">DBA</label>
+                      <div class="col-md-8">
+                        <input type="text" name="name" value="{{ project_infos.dba_user }}" maxlength="20"
+                               class="form-control"
+                               placeholder="DBA" readonly="readonly">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">环境需求</label>
+                      <div class="col-md-8">
+                        <input type="text" name="name" value="{{ project_infos.run_env }}" maxlength="20"
+                               class="form-control"
+                               placeholder="环境需求" readonly="readonly">
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">应用服务器</label>
+                      <div class="col-md-8">
+                        <textarea name="name" maxlength="20" readonly="readonly" class="form-control"
+                                  placeholder="应用服务器" required="">{{ project_infos.app_server }}</textarea>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">应用备注</label>
+                      <div class="col-md-8">
+                        <textarea name="name" maxlength="20" readonly="readonly" class="form-control"
+                                  placeholder="应用备注" required="">{{ project_infos.app_desc }}</textarea>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">数据服务器</label>
+                      <div class="col-md-8">
+                        <textarea name="name" maxlength="20" readonly="readonly" class="form-control"
+                                  placeholder="数据服务器" required="">{{ project_infos.data_server }}</textarea>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">数据库备注</label>
+                      <div class="col-md-8">
+                        <textarea name="name" maxlength="20" readonly="readonly" class="form-control"
+                                  placeholder="数据库备注" required="">{{ project_infos.data_desc }}</textarea>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="col-md-3 control-label">添加人员</label>
+                      <div class="col-md-8">
+                        <input type="text" name="add_user" value="{{ project_infos.add_user.nick_name }}" maxlength="20"
+                               class="form-control"
+                               placeholder="添加人员" readonly="readonly">
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-sm-8">
+                <div class="panel-heading" style="background-color: #003366; color: white;">
+                  <h3 class="panel-title">项目文档</h3>
+                </div>
+                <div class="panel-body" style="height: 580px; border: #F0F0F0 solid 1px;overflow-y: auto;">
+                  <div class="ibox-content" style="padding-top: 10px;">
+                    {{ project_infos.doc|safe }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-sm-12 text-center">
+                  <a data-toggle="modal" data-target="#editModal" data-backdrop='static'
+                     style="width: 100px;height: 25px;line-height: 25px;text-align: center; display:block;background: #003366;border: 0;border-radius: 4px;color: white; margin-top: 10px; margin-left: 48%">编辑</a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+  <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background-color: #003366; color: white;">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" style="color: white">&times;</span>
+          </button>
+          <h4 class="modal-title">编辑项目详情</h4>
+        </div>
+        <div class="modal-body" style="height: 740px;">
+
+          <form method="post" class="form-horizontal" id="js_addProInfoForm">
+
+            <input type="hidden" name="doc_num" value="{{ project_infos.id }}">
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">发起者</label>
+                <div class="col-md-10">
+                  <input type="text" name="ask_user" value="{{ project_infos.ask_user }}" maxlength="20"
+                         class="form-control" placeholder="输入项目发起者，多个请使用逗号隔开"
+                         required="">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">运维</label>
+                <div class="col-md-10">
+                  <input type="text" name="op_user" value="{{ project_infos.op_user }}" maxlength="20"
+                         class="form-control" placeholder="输入运维人员，多个请使用逗号隔开"
+                         required="">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">DBA</label>
+                <div class="col-md-10">
+                  <input type="text" name="dba_user" value="{{ project_infos.dba_user }}" maxlength="20"
+                         class="form-control" placeholder="输入DBA人员，多个请使用逗号隔开"
+                         required="">
+                </div>
+              </div>
+            </div>
+
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">环境</label>
+                <div class="col-md-10">
+                  <input type="text" name="run_env" value="{{ project_infos.run_env }}" maxlength="20"
+                         class="form-control" placeholder="输入运行环境需求，如 JDK"
+                         required="">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">应用</label>
+                <div class="col-md-10">
+                  <textarea name="app_server" maxlength="20" class="form-control" placeholder="应用服务器IP地址，多个请使用逗号隔开"
+                            required="">{{ project_infos.app_server }}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">备注</label>
+                <div class="col-md-10">
+                  <textarea name="app_desc" maxlength="20" class="form-control" placeholder="应用服务器备注"
+                            required="">{{ project_infos.app_desc }}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">数据库</label>
+                <div class="col-md-10">
+                  <textarea name="data_server" maxlength="20" class="form-control" placeholder="数据库服务器IP地址，多个请使用逗号隔开"
+                            required="">{{ project_infos.data_server }}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">备注</label>
+                <div class="col-md-10">
+                  <textarea name="data_desc" maxlength="20" class="form-control" placeholder="数据库服务器备注"
+                            required="">{{ project_infos.data_desc }}</textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-12">
+              <textarea id="id_doc_area" name="doc" class="ckeditor"
+                        placeholder="运维文档">{{ project_infos.doc }}</textarea>
+            </div>
+
+            <!-- 设置编辑框高度 -->
+            <script>
+                CKEDITOR.replace('id_doc_area', {
+                    height: 370
+                });
+            </script>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+          <input type="button" id="js_addProInfoBtn"
+                 style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;"
+                 value="保存">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- 管理项目提交 -->
+  <script>
+      $(function () {
+          //处理CKEDITOR的值
+          function CKupdate() {
+              for (instance in CKEDITOR.instances)
+                  CKEDITOR.instances[instance].updateElement();
+          }
+
+          // 提交表单
+          $('#js_addProInfoBtn').on('click', function () {
+              CKupdate();
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'project_mana:project_info' cate.id pro.id %}",
+                  data: $('#js_addProInfoForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'project_mana:project_detail' cate.id pro.id %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  <script>
+      $('#editModal').off('shown.bs.modal').on('shown.bs.modal', function (e) {
+          $(document).off('focusin.modal');
+      });
+  </script>
+
+{% endblock other_js %}

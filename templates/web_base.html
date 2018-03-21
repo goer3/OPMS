@@ -1,0 +1,715 @@
+{% load staticfiles %}
+{% load userlist_tag %}
+{% load record_tags %}
+{% load task_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+
+<!----------------------------------------------------- 头部开始 -------------------------------------------------------->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+  <!----------------------------------------------------- 标题 --------------------------------------------------------->
+  <title>
+    {% block title %}主面板{% endblock title %} | OPMS - 运维管理系统
+  </title>
+
+  <!----------------------------------------------------- 静态css文件 -------------------------------------------------->
+  <link rel="stylesheet" href="{% static 'users/css/bootstrap.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'users/css/animate.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'users/css/font-awesome.min.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'users/css/simple-line-icons.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'users/css/font.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'users/css/app.css' %}" type="text/css">
+
+  <!----------------------------------------------------- 其他静态css文件 ----------------------------------------------->
+  {% block other_css %}
+  {% endblock other_css %}
+</head>
+<!----------------------------------------------------- 头部结束 -------------------------------------------------------->
+
+
+<!----------------------------------------------------- 内容主体开始 ----------------------------------------------------->
+<body style="overflow:hidden; box-sizing:border-box;">
+<div class="app app-header-fixed" id="app">
+  <div id="wrapper" class="container1">
+
+    <!----------------------------------------------------- logo栏开始 --------------------------------------------------->
+    <div class="app-header navbar">
+
+      <!-- logo -->
+      <div class="navbar-header bg-white-only">
+        <a href="{% url 'users:index' %}" class="navbar-brand text-lt">
+          <i class="glyphicon glyphicon-send"></i>
+          <span class="hidden-folded m-l-xs">OPMS</span>
+        </a>
+      </div>
+
+      <!----------------------------------------------------- logo栏左边 ------------------------------------------------->
+      <div class="collapse pos-rlt navbar-collapse box-shadow bg-white-only">
+
+        <div class="nav navbar-nav hidden-xs">
+          <!-- 收起侧边栏按钮 -->
+          <a href="" class="btn no-shadow navbar-btn" data-toggle="class:app-aside-folded" data-target=".app">
+            <i class="fa fa-dedent fa-fw text"></i>
+            <i class="fa fa-indent fa-fw text-active"></i>
+          </a>
+
+          <!-- 显示大头像按钮 -->
+          <a href="" class="btn no-shadow navbar-btn" data-toggle="class:show" data-target="#aside-user">
+            <i class="icon-user fa-fw"></i>
+          </a>
+        </div>
+
+        <!-- 下拉菜单 -->
+        <ul class="nav navbar-nav hidden-sm">
+
+          <!-- 功能菜单 -->
+          <li class="dropdown pos-stc">
+            <a href="" data-toggle="dropdown" class="dropdown-toggle">
+              <span>功能菜单</span>
+              <span class="caret"></span>
+            </a>
+            <div class="dropdown-menu wrapper w-full bg-white">
+
+              <div class="row" style="font-size: 12px;">
+
+                <!-- 功能项目1 -->
+                <div class="col-sm-3">
+                  <div class="m-l-xs m-t-xs m-b-xs font-bold">资产管理</div>
+                  <div class="row">
+
+                    <!-- 第一列 -->
+                    <div class="col-xs-6">
+                      <ul class="list-unstyled l-h-2x">
+                        <li>
+                          <a href="{% url 'asset:host_list' %}">
+                            <i class="fa fa-fw fa-angle-right text-muted m-r-xs"></i>主机列表
+                          </a>
+                        </li>
+                        <li>
+                          <a href="{% url 'asset:port_map_list' %}">
+                            <i class="fa fa-fw fa-angle-right text-muted m-r-xs"></i>端口映射
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- 第二列 -->
+                    <div class="col-xs-6">
+                      <ul class="list-unstyled l-h-2x">
+                        <li>
+                          <a href="{% url 'asset:ssh_history_list' %}">
+                            <i class="fa fa-fw fa-angle-right text-muted m-r-xs"></i>远程记录
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 功能项目2 -->
+                <div class="col-sm-3 b-l b-light">
+                  <div class="m-l-xs m-t-xs m-b-xs font-bold">故障管理</div>
+                  <div class="row">
+
+                    <!-- 第一列 -->
+                    <div class="col-xs-6">
+                      <ul class="list-unstyled l-h-2x">
+                        <li>
+                          <a href="{% url 'record:record_archive' %}">
+                            <i class="fa fa-fw fa-angle-right text-muted m-r-xs"></i>故障分类
+                          </a>
+                        </li>
+                        <li>
+                          <a href="{% url 'record:record_list' %}">
+                            <i class="fa fa-fw fa-angle-right text-muted m-r-xs"></i>故障列表
+                            <span class="badge badge-sm bg-success">{% get_record_nums %}</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+
+                <!-- 功能项目3 -->
+                <div class="col-sm-3 b-l b-light">
+                  <div class="m-l-xs m-t-xs m-b-xs font-bold">项目管理</div>
+                  <div class="row">
+
+                    <!-- 第一列 -->
+                    <div class="col-xs-6">
+                      <ul class="list-unstyled l-h-2x">
+                        <li>
+                          <a href="{% url 'project_mana:project_category' %}">
+                            <i class="fa fa-fw fa-angle-right text-muted m-r-xs"></i>项目分类
+                          </a>
+                        </li>
+                        <li>
+                          <a href="{% url 'project_mana:install_doc_list' %}">
+                            <i class="fa fa-fw fa-angle-right text-muted m-r-xs"></i>安装文档
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+
+                  </div>
+                </div>
+
+                <!-- 功能项目3 -->
+                <div class="col-sm-3 b-l b-light">
+                  <div class="m-l-xs m-t-xs m-b-xs font-bold">更多</div>
+                  <div class="row">
+
+                    <!-- 第一列 -->
+                    <div class="col-xs-6">
+                      <ul class="list-unstyled l-h-2x">
+                        <li>
+                          <a href="">
+                            <i class="fa fa-fw fa-angle-right text-muted m-r-xs"></i>敬请期待
+                          </a>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </li>
+        </ul>
+
+
+        <!----------------------------------------------------- logo栏右边 ----------------------------------------------->
+        <ul class="nav navbar-nav navbar-right">
+
+          <!-- 提醒图标 -->
+          <li class="dropdown">
+            <a href="" data-toggle="dropdown" class="dropdown-toggle">
+              <i class="icon-bell fa-fw"></i>
+              <span class="visible-xs-inline">提醒图标</span>
+              {% ifnotequal request.user.get_notread_nums 0 %}
+                <span class="badge badge-sm up bg-danger pull-right-xs">{{ request.user.get_notread_nums }}</span>
+              {% endifnotequal %}
+            </a>
+
+            <!-- 提醒图标的下拉菜单 -->
+            <div class="dropdown-menu w-xl animated fadeInUp">
+              <div class="panel bg-white">
+                <div class="panel-heading b-light bg-light">
+                  <strong>你有 <span></span>{{ request.user.get_notread_nums }} 条信息 <a style="color: orangered;">（只显示最新 3
+                    条）</a></strong>
+                </div>
+                <div class="list-group">
+
+                  {% for each in request.user.get_notread_msgs|slice:'3' %}
+                    <a href="{% url 'message:message_list' %}" class="media list-group-item">
+                  <span class="pull-left thumb-sm">
+                    <img src="{{ MEDIA_URL }}{{ each.send_user.avatar }}" class="img-circle">
+                  </span>
+                      <span class="media-body block m-b-none">
+                    <p style="font-size: 12px;">{{ each.msg_content|safe }}</p><br>
+                    <small class="text-muted">{{ each.add_time }}</small>
+                  </span>
+                    </a>
+                  {% empty %}
+                    <p style="padding-top: 20px;padding-left: 20px; color: darkgray;">暂无消息！</p>
+                  {% endfor %}
+                </div>
+
+                <div class="panel-footer text-sm">
+                  <a href="{% url 'message:message_list' %}?msg_status=notread" class="pull-right">
+                    <i class="fa fa-cog"></i>
+                  </a>
+                  <a href="{% url 'message:message_list' %}?msg_status=notread">查看所有</a>
+                </div>
+              </div>
+            </div>
+          </li>
+
+          <!-- 用户头像 -->
+          <li class="dropdown">
+            <a href="#" data-toggle="dropdown" class="dropdown-toggle clear">
+            <span class="thumb-sm avatar pull-right m-t-n-sm m-b-n-sm m-l-sm">
+              <img src="{{ MEDIA_URL }}{{ request.user.avatar }}">
+              <i class="on md b-white bottom"></i>
+            </span>
+              <span class="hidden-sm hidden-md">{{ request.user.nick_name }}</span> <b class="caret"></b>
+            </a>
+
+            <!-- 头像下拉菜单 -->
+            <ul class="dropdown-menu animated fadeInRight w" style="font-size: 12px;">
+              <li class="wrapper b-b m-b-sm bg-light m-t-n-xs">
+                <progressbar value="60" class="progress-xs m-b-none bg-white"></progressbar>
+              </li>
+              <li>
+                <a href="{% url 'users:user_info' %}">
+                  <span>用户资料</span>
+                </a>
+              </li>
+              <li>
+                <a href="{% url 'message:feedback_message' %}">获取帮助</a>
+              </li>
+              <li class="divider"></li>
+              <li>
+                <a href="{% url 'users:logout' %}">注销</a>
+              </li>
+            </ul>
+
+          </li>
+
+        </ul>
+      </div>
+    </div>
+    <!----------------------------------------------------- logo栏结束 ---------------------------------------------------->
+
+
+    <!----------------------------------------------------- 侧边菜单栏开始 ------------------------------------------------->
+    <div class="app-aside hidden-xs bg-black">
+      <div class="aside-wrap">
+        <div class="navi-wrap">
+
+          <!-- 点击显示的用户大头像 -->
+          <div class="clearfix hidden-xs text-center hide" id="aside-user">
+            <div class="dropdown wrapper">
+              <a href="">
+                <span class="thumb-lg w-auto-folded avatar m-t-sm">
+                  <!-- 大头像 -->
+                  <img src="{{ MEDIA_URL }}{{ request.user.avatar }}" class="img-full">
+                </span>
+              </a>
+              <a href="" data-toggle="dropdown" class="dropdown-toggle hidden-folded">
+                <span class="clear">
+                  <span class="block m-t-sm">
+                    <strong class="font-bold text-lt">{{ request.user.username }}</strong>
+                    <b class="caret"></b>
+                  </span>
+                  <span class="text-muted text-xs block">{{ request.user.nick_name }}</span>
+                </span>
+              </a>
+
+              <!-- 头像下拉菜单 -->
+              <ul class="dropdown-menu animated fadeInRight w hidden-folded">
+                <li class="wrapper b-b m-b-sm bg-info m-t-n-xs">
+                  <progressbar value="60" type="white" class="progress-xs m-b-none dker"></progressbar>
+                </li>
+                <li>
+                  <a href="{% url 'users:user_info' %}" style="font-size: 12px;">用户资料</a>
+                </li>
+                <li>
+                  <a href="{% url 'message:feedback_message' %}">
+                    <span style="font-size: 12px;">获取帮助</span>
+                  </a>
+                </li>
+                <li class="divider"></li>
+                <li>
+                  <a href="{% url 'users:logout' %}">
+                    <span style="font-size: 12px;">注销</span>
+                  </a>
+                </li>
+              </ul>
+
+            </div>
+          </div>
+
+          <!-- 侧边功能栏 -->
+          <nav class="navi">
+            <ul class="nav">
+              <li>
+                &nbsp;
+              </li>
+
+              <li {% ifequal web_func 'index' %}class="active"{% endifequal %}>
+                <a href="{% url 'users:index' %}">
+                  <i class="glyphicon glyphicon-home"></i>
+                  <span style="font-size: 14px;">主面板</span>
+                </a>
+              </li>
+
+              <!-- 资产管理 -->
+              <li {% ifequal web_title 'asset' %}class="active"{% endifequal %}>
+                <a href="">
+                  <i class="glyphicon glyphicon-inbox"></i>
+                  <span style="font-size: 13px; ">资产管理</span>
+                </a>
+                <ul class="nav nav-sub dk" style="font-size: 12px;">
+                  <li {% ifequal web_func 'host' %}class="active"{% endifequal %}>
+                    <a href="{% url 'asset:host_list' %}">
+                      <span>主机管理</span>
+                    </a>
+                  </li>
+
+                  <li {% ifequal web_func 'ssh' %}class="active"{% endifequal %}>
+                    <a href="{% url 'asset:ssh_history_list' %}">
+                      <span>远程记录</span>
+                    </a>
+                  </li>
+
+                  <li {% ifequal web_func 'port' %}class="active"{% endifequal %}>
+                    <a href="{% url 'asset:port_map_list' %}">
+                      <span>端口管理</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <!-- 项目文档管理 -->
+              <li {% ifequal web_title 'project_mana' %}class="active"{% endifequal %}>
+                <a href="">
+                  <i class="glyphicon glyphicon-list-alt"></i>
+                  <span style="font-size: 13px; ">项目文档</span>
+                </a>
+                <ul class="nav nav-sub dk" style="font-size: 12px;">
+                  <li {% ifequal web_func 'project_mana' %}class="active"{% endifequal %}>
+                    <a href="{% url 'project_mana:project_category' %}">
+                      <span>项目管理</span>
+                    </a>
+                  </li>
+                  <li {% ifequal web_func 'project_doc' %}class="active"{% endifequal %}>
+                    <a href="{% url 'project_mana:install_doc_list' %}">
+                      <span>安装文档</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+
+              <!-- 任务管理 -->
+              <li {% ifequal web_title 'work_task' %}class="active"{% endifequal %}>
+                <a href="">
+                  {% get_task_nums request.user.id as unfinish_nums %}
+                  {% if unfinish_nums %}
+                    <b class="badge bg-success pull-right">{% get_task_nums request.user.id %}</b>
+                  {% endif %}
+                  <i class="glyphicon glyphicon-tasks"></i>
+                  <span style="font-size: 13px; ">任务管理</span>
+                </a>
+                <ul class="nav nav-sub dk" style="font-size: 12px;">
+                  <li {% ifequal web_func 'receive' %}class="active"{% endifequal %}>
+                    <a href="{% url 'work_task:receive_task_list' %}">
+                      {% if unfinish_nums %}
+                        <b class="badge bg-danger pull-right">{% get_task_nums request.user.id %}</b>
+                      {% endif %}
+                      <span>待办任务</span>
+                    </a>
+                  </li>
+                  <li {% ifequal web_func 'create' %}class="active"{% endifequal %}>
+                    <a href="{% url 'work_task:create_task_list' %}">
+                      <span>创建任务</span>
+                    </a>
+                  </li>
+                  <li {% ifequal web_func 'finish' %}class="active"{% endifequal %}>
+                    <a href="{% url 'work_task:finish_task_list' %}">
+                      <span>完结任务</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <!-- 线上管理 -->
+              <li {% ifequal web_title 'deploy_service' %}class="active"{% endifequal %}>
+                <a href="">
+                  <i class="fa fa-desktop"></i>
+                  <span style="font-size: 13px; ">线上管理</span>
+                </a>
+                <ul class="nav nav-sub dk" style="font-size: 12px;">
+                  <li {% ifequal web_func 'service' %}class="active"{% endifequal %}>
+                    <a href="{% url 'online_deploy:service_list' %}">
+                      <span>服务列表</span>
+                    </a>
+                  </li>
+                  <li {% ifequal web_func 'middleware' %}class="active"{% endifequal %}>
+                    <a href="{% url 'online_deploy:middleware_list' %}">
+                      <span>环境版本</span>
+                    </a>
+                  </li>
+                  <li {% ifequal web_func 'deploy' %}class="active"{% endifequal %}>
+                    <a href="{% url 'online_deploy:deploy_list' %}">
+                      <span>产品发布</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <!-- 故障管理 -->
+              <li {% ifequal web_title 'record' %}class="active"{% endifequal %}>
+                <a href="">
+                  <i class="fa fa-ambulance"></i>
+                  <span style="font-size: 13px; ">故障管理</span>
+                </a>
+                <ul class="nav nav-sub dk" style="font-size: 12px;">
+                  <li {% ifequal web_func 'record_list' %}class="active"{% endifequal %}>
+                    <a href="{% url 'record:record_list' %}">
+                      <b class="badge bg-success pull-right">{% get_record_nums %}</b>
+                      <span>故障记录</span>
+                    </a>
+                  </li>
+                  <li {% ifequal web_func 'record_archive' %}class="active"{% endifequal %}>
+                    <a href="{% url 'record:record_archive' %}">
+                      <span>分类统计</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+              <!-- 用户管理 -->
+              <li {% ifequal web_title 'user_manage' %}class="active"{% endifequal %}>
+                <a href="">
+                  <i class="icon-user"></i>
+                  <span style="font-size: 13px; ">用户管理</span>
+                </a>
+                <ul class="nav nav-sub dk" style="font-size: 12px;">
+
+                  <!-- 用户资料 -->
+                  <li {% ifequal web_func 'userinfo' %}class="active"{% endifequal %}>
+                    <a href="{% url 'users:user_info' %}">
+                      <span style="font-size: 13px;">用户资料</span>
+                    </a>
+                  </li>
+
+                  <!-- 用户列表 -->
+                  <li {% ifequal web_func 'user_list' %}class="active"{% endifequal %}>
+                    <a href="{% url 'users:user_list' %}">
+{#                      <i class="icon-users"></i>#}
+                      <span style="font-size: 13px;">用户列表</span>
+                    </a>
+                  </li>
+
+                  <!-- 用户登录记录 -->
+                  <li {% ifequal web_func 'login_record' %}class="active"{% endifequal %}>
+                    <a href="{% url 'users:login_record' %}">
+                      <span style="font-size: 13px;">登录记录</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+
+
+              <!-- 用户消息 -->
+              <li {% ifequal web_func 'message_list' %}class="active"{% endifequal %}>
+                <a href="{% url 'message:message_list' %}">
+                  {% ifnotequal request.user.get_notread_nums 0 %}
+                    <b class="badge bg-success pull-right">{{ request.user.get_notread_nums }}</b>
+                  {% endifnotequal %}
+                  <i class="icon-envelope"></i>
+                  <span style="font-size: 13px;">消息列表</span>
+                </a>
+              </li>
+
+
+              <!-- 获取帮助 -->
+              <li {% ifequal web_func 'feedback' %}class="active"{% endifequal %}>
+                <a href="{% url 'message:feedback_message' %}">
+                  <i class="icon-question"></i>
+                  <span style="font-size: 13px;">获取帮助</span>
+                </a>
+              </li>
+            </ul>
+          </nav>
+
+        </div>
+      </div>
+    </div>
+    <!----------------------------------------------------- 侧边菜单栏结束 ------------------------------------------------->
+
+
+    <!----------------------------------------------------- 内容主体结束 -------------------------------------------------->
+    {% block web_content %}
+      <!-- 内容主体 -->
+      <div class="app-content">
+        <a href class="off-screen-toggle hide" data-toggle="class:off-screen" data-target=".app-aside"></a>
+        <div class="app-content-body fade-in-up">
+          <div class="hbox hbox-auto-xs hbox-auto-sm">
+
+            <!----------------------------------------------------- 中间栏 ------------------------------------------------>
+            {% block center_content %}
+            {% endblock center_content %}
+
+            <!----------------------------------------------------- 右边栏 ------------------------------------------------>
+            {% block right_content %}
+              <div class="col w-lg bg-light lter b-l bg-auto">
+                <div class="wrapper">
+                  <div class="">
+                    <h5 class="m-t-xs m-b-xs">在线好友（最多显示10人）</h5>
+                    <hr>
+                    <ul class="list-group no-bg no-borders pull-in">
+
+                      {% get_friends_list as friend_list %}
+                      {% for each in friend_list %}
+                        <!-- 用户 -->
+                        <li class="list-group-item">
+                          <a class="pull-left thumb-sm avatar m-r">
+                            <img src="{{ MEDIA_URL }}{{ each.avatar }}" alt="..." class="img-circle">
+                            <i class="on b-white bottom"></i>
+                          </a>
+
+                          <div class="clear">
+                            <div>{{ each.nick_name }}&nbsp;&nbsp;
+                              {% ifequal each.username request.user.username %}
+                                <span style="color: orangered">【&nbsp;自&nbsp;己&nbsp;】</span>
+                              {% else %}
+                                <a class="fa fa-envelope-o" title="发送消息" data-toggle="modal"
+                                   href="#SendSingleMessage{{ each.id }}"></a>&nbsp;&nbsp;
+                                <a class="icon-user" title="查看资料" data-toggle="modal"
+                                   href="{% url 'users:other_user_info' each.id %}"></a>&nbsp;&nbsp;
+                              {% endifequal %}
+                            </div>
+                            <small class="text-muted">{{ each.department.name }} - {{ each.position.name }}</small>
+                          </div>
+                        </li>
+
+                        <!-- 个人信息框 -->
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1"
+                             id="SendSingleMessage{{ each.id }}"
+                             class="modal fade" style="display: none;">
+                          <div class="modal-dialog" style="padding-top: 100px;">
+                            <div class="modal-content">
+                              <div class="modal-header" style="background-color: #003366;">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                                        style="color: #fff;">
+                                  x
+                                </button>
+                                <h4 class="modal-title" style="color: #fff;">发送信息给：<b
+                                        style="color: orangered">{{ each.nick_name }}</b></h4>
+                              </div>
+                              <form method="post" id="js_SendMsgToOneForm{{ each.id }}">
+                              <textarea class="form-control no-border" rows="5" name="UserMessage"
+                                        placeholder="消息内容 ..."></textarea>
+                                <input type="hidden" name="send_to" value="{{ each.id }}">
+                              </form>
+                              <div class="panel-footer bg-light lter">
+                                <ul class="nav nav-pills nav-sm">
+                                  <li><a href=""><i class="fa fa-camera text-muted"></i></a></li>
+                                  <li class="pull-right">
+                                    <input type="button" style="width: 60px;" class="btn btn-info"
+                                           id="js_SendMsgToOneBtn{{ each.id }}" value="发 送">
+                                  </li>
+                                  <li class="pull-right">
+                                    <input type="button" style="width: 60px;" data-dismiss="modal" class="btn btn-info"
+                                           value="取 消">&nbsp;&nbsp;
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+
+                    </ul>
+
+                  </div>
+                </div>
+              </div>
+            {% endblock right_content %}
+
+          </div>
+        </div>
+      </div>
+    {% endblock web_content %}
+    <!----------------------------------------------------- 内容主体结束 -------------------------------------------------->
+
+
+    <!----------------------------------------------------- 页脚 --------------------------------------------------------->
+    <div class="app-footer wrapper b-t bg-light">
+      <span class="pull-right">v 2.0</span>
+      <a href="" target="_blank">© 2017 Copyright | More info OPMS</a>
+    </div>
+
+  </div>
+</div>
+
+<!----------------------------------------------------- js 静态文件 ----------------------------------------------------->
+<script src="{% static 'users/js/jquery.min.js' %}"></script>
+<script src="{% static 'users/js/bootstrap.js' %}"></script>
+
+<!----------------------------------------------------- 侧边栏js ----------------------------------------------------->
+<script type="text/javascript">
+    +function ($) {
+        $(function () {
+            // class
+            $(document).on('click', '[data-toggle^="class"]', function (e) {
+                e && e.preventDefault();
+                console.log('abc');
+                var $this = $(e.target), $class, $target, $tmp, $classes, $targets;
+                !$this.data('toggle') && ($this = $this.closest('[data-toggle^="class"]'));
+                $class = $this.data()['toggle'];
+                $target = $this.data('target') || $this.attr('href');
+                $class && ($tmp = $class.split(':')[1]) && ($classes = $tmp.split(','));
+                $target && ($targets = $target.split(','));
+                $classes && $classes.length && $.each($targets, function (index, value) {
+                    if ($classes[index].indexOf('*') !== -1) {
+                        var patt = new RegExp('\\s' +
+                            $classes[index].replace(/\*/g, '[A-Za-z0-9-_]+').split(' ').join('\\s|\\s') +
+                            '\\s', 'g');
+                        $($this).each(function (i, it) {
+                            var cn = ' ' + it.className + ' ';
+                            while (patt.test(cn)) {
+                                cn = cn.replace(patt, ' ');
+                            }
+                            it.className = $.trim(cn);
+                        });
+                    }
+                    ($targets[index] != '#') && $($targets[index]).toggleClass($classes[index]) || $this.toggleClass($classes[index]);
+                });
+                $this.toggleClass('active');
+            });
+
+            // collapse nav
+            $(document).on('click', 'nav a', function (e) {
+                var $this = $(e.target), $active;
+                $this.is('a') || ($this = $this.closest('a'));
+
+                $active = $this.parent().siblings(".active");
+                $active && $active.toggleClass('active').find('> ul:visible').slideUp(200);
+
+                ($this.parent().hasClass('active') && $this.next().slideUp(200)) || $this.next().slideDown(200);
+                $this.parent().toggleClass('active');
+
+                $this.next().is('ul') && e.preventDefault();
+
+                setTimeout(function () {
+                    $(document).trigger('updateNav');
+                }, 300);
+            });
+        });
+    }(jQuery);
+</script>
+
+{% get_friends_list as friend_list %}
+{% for each in friend_list %}
+  <script>
+      $(function () {
+          // 发送私信
+          $('#js_SendMsgToOneBtn{{ each.id }}').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'message:send_message' %}",
+                  data: $('#js_SendMsgToOneForm{{ each.id }}').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+{% endfor %}
+
+<!----------------------------------------------------- 其他静态js文件 ----------------------------------------------------->
+{% block other_js %}
+{% endblock other_js %}
+
+</body>
+</html>

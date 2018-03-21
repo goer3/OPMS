@@ -1,0 +1,108 @@
+{% extends 'users_base.html' %}
+{% load staticfiles %}
+
+
+<!-- 页面标题 -->
+{% block web_title %}
+  登录 | OPMS - 运维管理系统
+{% endblock web_title %}
+
+<!-- 其他css -->
+{% block other_css %}
+  <style>
+    .captcha {
+      float: right;
+    }
+  </style>
+{% endblock other_css %}
+
+
+<!-- 页面主体 -->
+{% block web_content %}
+  <div class="loginColumns animated fadeInDown">
+    <div class="row" style="margin-top: 20%;">
+
+      <!-- 登录框左边 -->
+      <div class="col-md-6">
+        <h2 class="font-bold">欢迎使用 OPMS 运维管理系统</h2>
+        <div style="line-height: 30px; margin-top: 20px;">
+          <p>
+            OPMS 是一款由 Python, Django 框架开发的运维管理系统, 助力于互联网企业高效的用户、资产、权限、审计管理。
+          </p>
+          <p>
+            我们以自动化运维为最初的起点，旨在打造一个易用、稳定、安全、功能全面的运维管理平台。
+          </p>
+          <small>由于该平台记录的都是关于运维部门内部的一些数据，如非本部门内部成员，请您立即停止访问：</small>
+          <p><b>Thank you so much for the cooperation！</b></p>
+        </div>
+      </div>
+
+      <!-- 登录框右边 -->
+      <div class="col-md-6">
+        <div class="ibox-content">
+          <div>
+            <i class="glyphicon glyphicon-send" style="font-size: x-large; color: #1c2b36;;">&nbsp;</i>
+            <span class="font-bold text-center" style="font-size: 30px; font-family: inherit; color: #1c2b36;">登录</span>
+          </div>
+          <form class="m-t" role="form" method="post" action="{% url 'users:login' %}">
+            {% csrf_token %}
+
+            <!-- 用户名或者邮箱 -->
+            <div class="form-group">
+              <input type="text" class="form-control" name="username" placeholder="用户名/邮箱" required="">
+            </div>
+
+            <!-- 密码 -->
+            <div class="form-group">
+              <input type="password" class="form-control" name="password" placeholder="密码" required="">
+            </div>
+
+            <div class="form-group">
+              {{ login_form.captcha }}
+
+              <!-- 错误提示 -->
+              {% if msg %}
+                <p style="color: red; margin-top: 10px;">{{ msg }}</p>
+              {% else %}
+                <p style="color: red; margin-top: 10px;">{{ login_form.errors.captcha|cut:'<ul class="errorlist"><li>' }}</p>
+              {% endif %}
+
+              <!-- 刷新验证码 -->
+              <script>
+                  function refresh_captcha() {
+                      $.getJSON("/captcha/refresh/",
+                          function (result) {
+                              $('.captcha').attr('src', result['image_url']);
+                              $('#id_captcha_0').val(result['key'])
+                          })
+                  }
+
+                  $('.captcha').click(refresh_captcha)
+              </script>
+            </div>
+
+            <!-- 登录按钮 -->
+            <button type="submit" class="btn bg-black block full-width m-b" style="color: white">登录</button>
+
+            <small>忘记密码? | <a href="{% url 'users:forget_password' %}" style="color: #003366;">现在找回</a></small>
+
+            <p class="text-muted text-center">
+            </p>
+          </form>
+          <p class="m-t">
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock web_content %}
+
+
+<!-- 其他js -->
+{% block other_js %}
+  <script>
+    document.getElementById("id_captcha_1").style.width = '60%';
+    document.getElementById("id_captcha_1").className = 'form-control';
+    document.getElementById("id_captcha_1").setAttribute("placeholder","验证码");
+  </script>
+{% endblock other_js %}

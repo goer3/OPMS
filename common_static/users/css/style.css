@@ -1,0 +1,134 @@
+/* BASIC THEME CONFIGURATION */
+body {
+    color: #797979;
+	background: #f2f2f2;
+    font-family: 'Ruda', sans-serif;
+    padding: 0px !important;
+    margin: 0px !important;
+    font-size:13px;
+}
+
+ul li {
+    list-style: none;
+}
+
+a, a:hover, a:focus {
+    text-decoration: none;
+    outline: none;
+}
+::selection {
+
+    background: #666666;
+    color: #fff;
+}
+::-moz-selection {
+    background: #666666;
+    color: #fff;
+}
+
+#container {
+    width: 100%;
+    height: 100%;
+}
+.copyrights{
+	text-indent:-9999px;
+	height:0;
+	line-height:0;
+	font-size:0;
+	overflow:hidden;
+}
+
+/* Bootstrap Modifications */
+.modal-header {
+	background: #003366;
+}
+
+.modal-title {
+	color: white;
+}
+
+.btn-round {
+	border-radius: 20px;
+	-webkit-border-radius: 20px;
+}
+
+.accordion-heading .accordion-toggle {
+	display: block;
+	cursor: pointer;
+	border-top: 1px solid #F5F5F5;
+	padding: 5px 0px;
+	line-height: 28.75px;
+	text-transform: uppercase;
+	color: #1a1a1a;
+	background-color: #ffffff;
+	outline: none !important;
+	text-decoration: none;
+}
+
+
+
+/*Theme Buttons*/
+
+.btn-theme {
+  color: #fff;
+  background-color: #003366;
+  border-color: #003366;
+}
+.btn-theme:hover,
+.btn-theme:focus,
+.btn-theme:active,
+.btn-theme.active,
+.open .dropdown-toggle.btn-theme {
+  color: #fff;
+  background-color: #003388;
+  border-color: #003388;
+}
+
+
+.btn-clear-g:hover {
+	color: white;
+}
+
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #797979;
+}
+
+
+/*LOGIN CONFIGURATION PAGE*/
+.form-login {
+	max-width: 330px;
+	margin: 100px auto 0;
+	background: #fff;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+
+.form-login h2.form-login-heading {
+	margin: 0;
+	padding: 25px 20px;
+	text-align: center;
+	background: #003366;
+	border-radius: 5px 5px 0 0;
+	-webkit-border-radius: 5px 5px 0 0;
+	color: #fff;
+	font-size: 20px;
+	text-transform: uppercase;
+	font-weight: 300;
+}
+.login-wrap {
+	padding: 20px;
+}
+.login-wrap .registration {
+	text-align: center;
+}
+.login-social-link {
+	display: block;
+	margin-top: 20px;
+	margin-bottom: 15px;
+}
+
+
+

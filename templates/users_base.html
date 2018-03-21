@@ -1,0 +1,45 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>
+    {% block web_title %}
+    {% endblock web_title %}
+  </title>
+  <link rel="shortcut icon" href="" type="image/x-icon">
+
+  <!-- css -->
+  <link href="{% static 'users/css/bootstrap.css' %}" rel="stylesheet">
+  <link href="{% static 'users/css/font-awesome.min.css' %}" rel="stylesheet">
+  <link href="{% static 'users/css/other-style.css' %}" rel="stylesheet">
+  <link href="{% static 'users/css/app.css' %}" rel="stylesheet">
+
+  <!-- 其他css -->
+  {% block other_css %}
+    <style>
+      .captcha {
+        float: right;
+      }
+    </style>
+  {% endblock other_css %}
+
+  <!-- js -->
+  <script src="{% static 'users/js/jquery.js' %}"></script>
+  <script src="{% static 'users/js/bootstrap.js' %}"></script>
+
+</head>
+
+<body class="" style="background-color: #E0E0E0">
+
+<!-- 页面主体 -->
+{% block web_content %}
+{% endblock web_content %}
+
+<!-- 其他js -->
+{% block other_js %}
+{% endblock other_js %}
+
+</body>
+</html>

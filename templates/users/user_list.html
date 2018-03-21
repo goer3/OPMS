@@ -1,0 +1,307 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+<!-- 标题 -->
+{% block title %}
+  用户列表
+{% endblock title %}
+
+<!-- 主体 -->
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder">
+      <!-- 用户列表 -->
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+              <span>&nbsp;&nbsp;用户列表</span>
+            </div>
+          </div>
+          <div class="panel-body" style="height: 745px;">
+            <div class="module-option clearfix">
+              <form class="navbar-form pull-left " role="search" method="get" style="margin-top: 0px;">
+                <div class="form-group">
+                  <div class="input-group">
+                    <input type="text" class="form-control input-sm bg-light no-border rounded" name="keywords"
+                           placeholder="关键词搜索" style="width: 150px;">
+                    <span class="input-group-btn">
+                        <button type="submit" class="btn btn-sm bg-auto rounded"><i class="fa fa-search"></i></button>
+                      </span>
+                  </div>
+                </div>
+              </form>
+
+              <div class="btn-group pull-right" style="padding-right: 20px;">
+                <span class="input-group-btn">
+                  <button type="submit"
+                          class="btn btn-sm {% ifequal display_chose 'all' %}bg-black{% else %}bg-auto{% endifequal %} rounded">
+                    <a href="?&display_chose=all" {% ifequal display_chose 'all' %}style="color: #fff;"{% endifequal %}>全部</a>
+                  </button>
+                </span>
+                <span class="input-group-btn">
+                  <button type="submit"
+                          class="btn btn-sm {% ifequal display_chose 'male' %}bg-black{% else %}bg-auto{% endifequal %}">
+                    <a href="?&display_chose=male"
+                       {% ifequal display_chose 'male' %}style="color: #fff;"{% endifequal %}>男</a>
+                  </button>
+                </span>
+                <span class="input-group-btn">
+                  <button type="submit"
+                          class="btn btn-sm {% ifequal display_chose 'female' %}bg-black{% else %}bg-auto{% endifequal %} rounded">
+                    <a href="?&display_chose=female"
+                       {% ifequal display_chose 'female' %}style="color: #fff;"{% endifequal %}>女</a>
+                  </button>
+                </span>
+              </div>
+            </div>
+
+            <div style="overflow-y: auto; height: 560px;">
+              {% for each_user in all_users.object_list %}
+                {% ifnotequal each_user.username request.user.username %}
+                  <!-- 个人信息 -->
+                  <div class="col-md-4 col-xs-12 profile_details" style="margin-top: 10px;">
+                    <div style="display: inline-block; border: 1px solid #e3e3e3;">
+                      <div class="col-sm-12">
+                        <div class="left col-xs-7">
+                          <h3 style="color: #003366;">
+                            {% if each_user.is_active %}
+                              {{ each_user.nick_name }}
+                            {% else %}
+                              <span style="color: orangered">{{ each_user.nick_name }}<span style="color: black; font-size: 14px;">（禁用）</span></span>
+                            {% endif %}
+                            <b style="font-size: 12px; color: orangered">&lt; {{ each_user.username }} &gt;</b>
+                            {% if request.user.is_superuser %}
+                              <span class="dropdown">
+                                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                                  <i class="fa fa-cog" style="font-size: 14px; color: #003366;"></i>
+                                </a>
+                                <ul class="dropdown-menu">
+                                  <li>
+                                    <a data-toggle="modal" data-backdrop='static'
+                                       data-target="#ManaUserModal{{ each_user.id }}" style="color: #3a3f51">用户管理</a>
+                                  </li>
+                                </ul>
+                              </span>
+                            {% endif %}
+                          </h3>
+
+                          <ul class="list-unstyled">
+                            <li style="margin-bottom: 5px;">
+                              <i class="glyphicon glyphicon-map-marker"
+                                 style="color: #003366"></i>&nbsp;&nbsp;{{ each_user.address|slice:'10' }}...
+                            </li>
+                            <li style="margin-bottom: 5px;">
+                              <i class="fa fa-qq" style="color: #003366"></i>&nbsp;&nbsp;{{ each_user.qq }}
+                            </li>
+                            <li style="margin-bottom: 5px;">
+                              <i class="glyphicon glyphicon-phone"
+                                 style="color: #003366"></i>&nbsp;&nbsp;{{ each_user.mobile }}
+                            </li>
+                          </ul>
+                        </div>
+
+                        <div class="right col-xs-4 text-center">
+                          <img src="{{ MEDIA_URL }}{{ each_user.avatar }}" alt="" class="img-circle img-responsive"
+                               style="padding-top: 20px;">
+                        </div>
+
+                      </div>
+                      <div class="col-xs-12 bottom" style="padding-bottom: 10px;">
+                        <div class="col-xs-12 col-sm-6 emphasis">
+                          <p class="ratings" style="padding-left: 3px;">
+                            <i class="fa fa-bookmark-o"
+                               style="color: #003366"></i>&nbsp;&nbsp;{{ each_user.department.name }}
+                            / {{ each_user.position.name }}
+                          </p>
+
+                        </div>
+                        <div class="col-xs-12 col-sm-6 emphasis pull-right text-center">
+                          <a class="fa fa-envelope" data-toggle="modal" href="#SendMessage{{ each_user.id }}"
+                             style="color: #104E8B">&nbsp;发送消息</a>&nbsp;&nbsp;
+                          <a href="{% url 'users:other_user_info' each_user.id %}">
+                            <i class="fa fa-user" style="color: #104E8B">&nbsp;查看资料</i></a>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 个人信息框 -->
+                  <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1"
+                       id="SendMessage{{ each_user.id }}"
+                       class="modal fade" style="display: none;">
+                    <div class="modal-dialog" style="padding-top: 100px;">
+                      <div class="modal-content">
+                        <div class="modal-header" style="background-color: #003366;">
+                          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                                  style="color: #fff;">
+                            x
+                          </button>
+                          <h4 class="modal-title" style="color: #fff;">发送信息给：<b
+                                  style="color: orangered">{{ each_user.nick_name }}</b></h4>
+                        </div>
+                        <form method="post" id="js_UserListSendMsgForm{{ each_user.id }}">
+                      <textarea name="UserMessage" class="form-control no-border" rows="5"
+                                placeholder="通知内容 ..."></textarea>
+                          <input type="hidden" name="send_to" value="{{ each_user.id }}">
+                        </form>
+                        <div class="panel-footer bg-light lter">
+                          <ul class="nav nav-pills nav-sm">
+                            <li><a href=""><i class="fa fa-camera text-muted"></i></a></li>
+                            <li class="pull-right">
+                              <input type="button" style="width: 60px;" id="js_UserListSendMsgBtn{{ each_user.id }}"
+                                     class="btn btn-info"
+                                     value="发 送">
+                            </li>
+                            <li class="pull-right">
+                              <input type="button" style="width: 60px;" data-dismiss="modal" class="btn btn-info"
+                                     value="取 消">&nbsp;&nbsp;
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                {% endifnotequal %}
+              {% endfor %}
+            </div>
+
+            <!-- 页码 -->
+            <div class="row">
+              <div class="col-md-12 text-center" style="margin-top: 30px;">
+                <ul class="pagination">
+                  <!-- 上一页 -->
+                  {% if all_users.has_previous %}
+                    <li class="long"><a href="?{{ all_users.previous_page_number.querystring }}">上一页</a></li>
+                  {% endif %}
+                  <!-- 页码 -->
+                  {% for page in all_users.pages %}
+                    {% if page %}
+                      {% ifequal page all_users.number %}
+                        <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                                class="sr-only">(current)</span></a></li>
+                      {% else %}
+                        <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                      {% endifequal %}
+                    {% else %}
+                      <li><a href="">...<span class="sr-only"></span></a></li>
+                    {% endif %}
+                  {% endfor %}
+                  <!-- 下一页 -->
+                  {% if all_users.has_next %}
+                    <li><a href="?{{ all_users.next_page_number.querystring }}">下一页<span class="sr-only"></span></a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+{% endblock center_content %}
+
+{% block other_js %}
+  {% for each_user in all_users.object_list %}
+    <script>
+        $(function () {
+            // 发送消息
+            $('#js_UserListSendMsgBtn{{ each_user.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'message:send_message' %}",
+                    data: $('#js_UserListSendMsgForm{{ each_user.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "";
+                            window.alert(data.msg);
+                        } else if (data.status == 'fail') {
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+  {% endfor %}
+
+  {% for each_user in all_users.object_list %}
+    {% ifnotequal each_user.username request.user.username %}
+      <!-- 管理分类 -->
+      <div class="modal fade" id="ManaUserModal{{ each_user.id }}" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top: 10%">
+        <div class="modal-dialog" style="width: 300px;">
+          <div class="modal-content">
+            <div class="modal-header" style="background-color: #003366; color: white;">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true" style="color: white">&times;</span>
+              </button>
+              <h4 class="modal-title">【开启 / 关闭】用户登录</h4>
+            </div>
+            <form class="form-horizontal" id="js_manaUserForm{{ each_user.id }}">
+              <div class="modal-body" style="height: 50px;">
+                <div class="col-sm-6">
+                  用户状态
+                </div>
+                <div class="col-sm-6">
+                  {% if each_user.is_active %}
+                    <input type="hidden" name="user_status" value="on">
+                    <input type="button" id="js_manaUserBtn{{ each_user.id }}" class="no-border pull-right"
+                           style="background-color: white; color: orangered;" value="点击禁用用户">
+                  {% else %}
+                    <input type="hidden" name="user_status" value="off">
+                    <input type="button" id="js_manaUserBtn{{ each_user.id }}" class="no-border"
+                           style="background-color: white; color: green;" value="点击激活用户">
+                  {% endif %}
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 管理项目提交 -->
+      <script>
+          $(function () {
+              // 提交表单
+              $('#js_manaUserBtn{{ each_user.id }}').on('click', function () {
+                  $.ajax({
+                      cache: false,
+                      type: "POST",
+                      url: "{% url 'users:user_status_mana' each_user.id %}",
+                      data: $('#js_manaUserForm{{ each_user.id }}').serialize(),
+                      async: true,
+                      beforeSend: function (xhr, settings) {
+                          // 这里需要csrf_token的值，而不是代码
+                          xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                      },
+                      success: function (data) {
+                          if (data.status == 'success') {
+                              window.location.href = "{% url 'users:user_list' %}";
+                              window.alert(data.msg);
+                          } else if (data.status == 'fail') {
+                              window.alert(data.msg);
+                          }
+                      }
+                  });
+              });
+          })
+      </script>
+    {% endifnotequal %}
+  {% endfor %}
+{% endblock other_js %}
+
+
+

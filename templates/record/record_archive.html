@@ -1,0 +1,181 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+{% load record_tags %}
+
+
+{% block title %}
+  分类统计
+{% endblock title %}
+
+
+{% block other_css %}
+  <link rel="stylesheet" href="{% static 'record/down_style.css' %}" type="text/css">
+{% endblock other_css %}
+
+
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder">
+      <!-- 用户反馈 -->
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+            <span>&nbsp;&nbsp;分类统计</span>
+          </div>
+        </div>
+        <div class="panel-body" style="height: 745px;">
+
+          <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+            <div class="row">
+              <div class="col-sm-6"></div>
+              <div class="col-sm-6"></div>
+            </div>
+
+            <div class="row">
+
+              <div class="padder col-lg-3">
+                <!-- 用户反馈 -->
+                <div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading" style="background-color: #003366; ">
+                      <div class="text-center">
+                        <a href="" style="font-size: 18px;color: white;">记录归档</a>
+                      </div>
+                    </div>
+                    <div class="panel-body" style="height: 660px;">
+                      <div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+                        <ul id="accordion" class="accordion" style="overflow-y: auto; height: 630px;">
+                          {% get_all_record as archives_list %}
+                          {% regroup archives_list by start_time.year as year_group %}
+                          {% for year in year_group %}
+                            <li>
+                              <div class="link">{{ year.grouper }} 年
+                                <b style="margin-right: 60%;"></b>
+                                <i class="fa fa-chevron-down"></i>
+                                <b class="badge bg-info">{{ year.list | length }}</b>
+                              </div>
+                              <ul class="submenu">
+                                {% regroup year.list by start_time.month as month_group %}
+                                {% for month in month_group %}
+                                  <li>
+                                    <a href="{% url 'record:record_time_archive' year.grouper month.grouper %}">{{ month.grouper }}
+                                      月
+                                      <b class="badge bg-danger pull-right"
+                                         style="margin-right: 15%;">{{ month.list | length }}</b>
+                                    </a>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="padder col-lg-3">
+                <!-- 用户反馈 -->
+                <div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading" style="background-color: #003366; ">
+                      <div class="text-center">
+                        <a href="" style="font-size: 18px;color: white;">标签分类</a>
+                      </div>
+                    </div>
+                    <div class="panel-body" style="height: 660px;">
+                      <div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+
+                        <ul id="accordion" class="accordion" style="overflow-y: auto; height: 630px;">
+                          {% get_tag_record as record_list %}
+                          {% for each in record_list %}
+                            <li>
+                              <a href="{% url 'record:record_tag_archive' each.id %}">
+                                <div class="link">{{ each.name }}
+                                  <b class="badge bg-info pull-right">{{ each.faultrecord_set.count }}</b>
+                                </div>
+                              </a>
+                            </li>
+                          {% endfor %}
+                        </ul>
+
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="padder col-lg-3">
+                <!-- 用户反馈 -->
+                <div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading" style="background-color: #003366; ">
+                      <div class="text-center">
+                        <a href="" style="font-size: 18px;color: white;">省份分类</a>
+                      </div>
+                    </div>
+                    <div class="panel-body" style="height: 660px;">
+                      <div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+                        <ul id="accordion" class="accordion" style="overflow-y: auto; height: 630px;">
+                          {% get_province_record as record_list %}
+                          {% for each in record_list %}
+                            <li>
+                              <a href="{% url 'record:record_province_archive' each.id %}">
+                                <div class="link">{{ each.name }}
+                                  <b class="badge bg-info pull-right">{{ each.faultrecord_set.count }}</b>
+                                </div>
+                              </a>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="padder col-lg-3">
+                <!-- 用户反馈 -->
+                <div>
+                  <div class="panel panel-default">
+                    <div class="panel-heading" style="background-color: #003366; ">
+                      <div class="text-center">
+                        <a href="" style="font-size: 18px;color: white;">用户分类</a>
+                      </div>
+                    </div>
+                    <div class="panel-body" style="height: 660px;">
+                      <div class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+                        <ul id="accordion" class="accordion" style="overflow-y: auto; height: 630px;">
+                          {% get_user_record as record_list %}
+                          {% for each in record_list %}
+                            <li>
+                              <a href="{% url 'record:record_user_archive' each.id %}">
+                                <div class="link">{{ each.nick_name }}
+                                  <b class="badge bg-info pull-right">{{ each.faultrecord_set.count }}</b>
+                                </div>
+                              </a>
+                            </li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+  <script src="{% static 'record/down_index.js' %}"></script>
+{% endblock other_js %}

@@ -1,0 +1,384 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+<!-- 标题 -->
+{% block title %}
+  我的消息
+{% endblock title %}
+
+
+<!-- 内容主体 -->
+{% block center_content %}
+  <div class="col">
+    <div style="background:url({% static 'users/img/bg.jpg' %}) center center; background-size:cover">
+      <div class="wrapper-lg bg-white-opacity">
+        <div class="row m-t">
+
+          <div class="col-sm-7">
+            <a href="" class="thumb-lg pull-left m-r">
+              <img src="{{ MEDIA_URL }}{{ request.user.avatar }}" class="img-circle">
+            </a>
+            <div class="clear m-b">
+              <div class="m-b m-t-sm">
+                <span class="h3 text-black" style="color: #003366;">{{ request.user.nick_name }}</span>
+                <small class="m-l"><i class="glyphicon glyphicon-map-marker"></i></small>
+                <span class="h5 text-black">{{ request.user.address }} &lt; {{ request.user.department.name }} - {{ request.user.position.name }} &gt;</span>
+              </div>
+              <p class="m-b">
+                <button type="button" class="btn btn-sm btn-bg btn-rounded btn-default btn-icon" data-toggle="tooltip"
+                        data-placement="bottom" title="{{ request.user.qq }}"><i class="fa fa-qq"
+                                                                                 style="color: #003366"></i></button>
+                <button type="button" class="btn btn-sm btn-bg btn-rounded btn-default btn-icon" data-toggle="tooltip"
+                        data-placement="bottom" title="{{ request.user.wechat }}"><i class="fa fa-wechat"
+                                                                                     style="color: #003366"></i>
+                </button>
+                <button type="button" class="btn btn-sm btn-bg btn-rounded btn-default btn-icon" data-toggle="tooltip"
+                        data-placement="bottom" title="{{ request.user.mobile }}"><i class="fa fa-phone"
+                                                                                     style="color: #003366"></i>
+                </button>
+              </p>
+              <a data-toggle="modal" href="#SendAllMessage" class="btn btn-sm btn-success btn-rounded">发通知</a>
+            </div>
+
+            <!-- 通知信息框 -->
+            <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1" id="SendAllMessage"
+                 class="modal fade" style="display: none;">
+              <div class="modal-dialog" style="margin-top: 100px;">
+                <div class="modal-content">
+                  <div class="modal-header" style="background-color: #003366;">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: #fff;">x
+                    </button>
+                    <h4 class="modal-title" style="color: #fff;">发布公告</h4>
+                  </div>
+                  <form method="post" id="js_UserSendMessageForm">
+                    <textarea class="form-control no-border" rows="10" id="id_UserMessage" name="UserMessage"
+                              placeholder="通知内容 ..."></textarea>
+                    <input type="hidden" name="send_to" value="0">
+                    <div class="panel-footer bg-light lter">
+                      <ul class="nav nav-pills nav-sm">
+                        <li><a href=""><i class="fa fa-camera text-muted"></i></a></li>
+                        <li class="pull-right">
+                          <input type="button" class="btn btn-info" style="width: 60px;" id="js_UserSendMessageBtn"
+                                 value="&nbsp;发 布&nbsp;">
+                        </li>
+                        <li class="pull-right">
+                          <input type="button" data-dismiss="modal" class="btn btn-info" style="width: 60px;"
+                                 value="&nbsp;取 消&nbsp;">&nbsp;&nbsp;
+                        </li>
+                      </ul>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-sm-5">
+            <div class="pull-right pull-none-xs text-center">
+              <a href="" class="m-b-md inline m">
+                <span class="h3 block font-bold">{{ join_days }}</span>
+                <small>JOIN DAYS</small>
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="wrapper bg-white b-b">
+      <ul class="nav nav-pills nav-sm">
+        <li {% ifequal msg_status 'all' %}class="active"{% endifequal %}><a href="?msg_status=all">全部消息</a></li>
+        <li {% ifequal msg_status 'notread' %}class="active"{% endifequal %}><a href="?msg_status=notread">全部未读</a></li>
+        <li {% ifequal msg_status 'user_all' %}class="active"{% endifequal %}><a href="?msg_status=user_all">用户消息</a>
+        </li>
+        <li {% ifequal msg_status 'user_notread' %}class="active"{% endifequal %}><a href="?msg_status=user_notread">用户未读</a>
+        </li>
+        <li {% ifequal msg_status 'me' %}class="active"{% endifequal %}><a href="?msg_status=me">我的消息</a></li>
+        <li class="pull-right"><a href="">共 <b style="color: orangered">{{ msg_nums }}</b> 条</a></li>
+        <li class="pull-right">
+          <div class="module-option clearfix">
+            <form class="navbar-form  navbar-left" role="search" style="margin-top: 0px; margin-bottom: 0px;">
+              <div class="form-group">
+                <div class="input-group">
+                  <form method="get">
+                    <input type="text" name="keywords" class="form-control input-sm bg-light no-border rounded"
+                           placeholder="关键词搜索" style="width: 150px;">
+                    <span class="input-group-btn">
+                      <button type="submit" class="btn btn-sm bg-auto rounded"><i class="fa fa-search"></i></button>
+                    </span>
+                  </form>
+                </div>
+              </div>
+            </form>
+          </div>
+        </li>
+
+      </ul>
+    </div>
+
+
+    <div class="padder" style="overflow-y: auto; height: 560px">
+      <div class="streamline b-l b-info m-l-lg m-b padder-v">
+
+        {% for each_msg in user_msgs.object_list %}
+          <div>
+            <a class="pull-left thumb-sm avatar m-l-n-md">
+              <img src="{{ MEDIA_URL }}{{ each_msg.send_user.avatar }}" alt="...">
+            </a>
+            <div class="m-l-lg m-b-lg panel b-a bg-light lt">
+              <div class="panel-heading pos-rlt b-light">
+                <span class="arrow arrow-light left"></span>
+                <a href="" style="color: #003366;"><b>SEND FROM：</b>&nbsp;&nbsp;{{ each_msg.send_user.nick_name }} </a>
+
+                {% ifnotequal each_msg.send_to 0 %}
+                  <b style="color: orangered">&nbsp;&nbsp;&lt; 私信 --
+                    {% for user in all_users %}
+                      {% ifequal user.id each_msg.send_to %}
+                        {{ user.nick_name }}
+                      {% endifequal %}
+                    {% endfor %}
+                    &gt;</b>
+                {% else %}
+                  <b style="color: green">&nbsp;&nbsp;&lt; 通知 &gt;</b>
+                {% endifnotequal %}
+
+                &nbsp;&nbsp;发自：{{ each_msg.add_time }}
+
+                <span class="text-muted m-l-sm pull-right">更新时间：{{ each_msg.update_time }}</span>
+
+                {% ifnotequal each_msg.send_user.id request.user.id %}
+                  {% if request.user.username in each_msg.get_read_user_list %}
+                    <a href="" id="js_isRead" style="display: block" class="pull-right">
+                      <i class="fa fa-check-circle" title="已读" style="color: green"></i>
+                    </a>
+                  {% else %}
+                    <form action="" id="js_isNotReadForm{{ each_msg.id }}" method="post" style="display: inline">
+                      <input type="hidden" name="NotReadMessage_id" value="{{ each_msg.id }}">
+                      <a href="" id="js_isNotReadBtn{{ each_msg.id }}" style="display: block" class="pull-right">
+                        <i class="fa fa-circle-o" title="标记为已读"></i>
+                      </a>
+                    </form>
+                  {% endif %}
+                {% endifnotequal %}
+              </div>
+              <div class="panel-body" style="padding-bottom: 0;padding-top: 0;">
+
+                <!-- 消息 -->
+                <div>{{ each_msg.msg_content|safe }}</div>
+
+                  <!-- 回复 -->
+                  <div style="margin-top: 25px;">
+                      {% for each_comment in each_msg.usercomment_set.all %}
+                      <div class="m-l-lg">
+                        <a class="pull-left thumb-sm avatar">
+                          <img src="{{ MEDIA_URL }}{{ each_comment.send_user.avatar }}" alt="...">
+                        </a>
+                        <div class="m-l-xxl panel b-a">
+                          <div class="panel-heading pos-rlt">
+                            <span class="arrow left pull-up"></span>
+                            <span class="text-muted m-l-sm pull-right">
+                            回复时间：{{ each_comment.add_time }}
+                              {% ifequal each_comment.send_user.id request.user.id %}
+                                <form id="id_jsDelCommentForm{{ each_comment.id }}" method="post">
+                              <input type="hidden" name="comment_id" value="{{ each_comment.id }}">
+                              <input type="button" id="id_jsDelCommentBtn{{ each_comment.id }}" class="close"
+                                     aria-hidden="true" title="删除评论"
+                                     style="border: 0; background-color: white" value="x">
+                            </form>
+                              {% endifequal %}
+                          </span>
+                            <a href="" style="color: #003366;"><b>REPLAY
+                              FROM：</b>&nbsp;&nbsp;{{ each_comment.send_user.nick_name }}&nbsp; -
+                              &nbsp;{{ each_comment.send_user.position.name }}
+                            </a>
+                            <p style="margin-top: 10px;">{{ each_comment.cmt_content }}</p>
+                          </div>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  </div>
+
+
+              </div>
+
+              <!-- 回复框 -->
+            {% ifnotequal each_msg.send_user.username superuser %}
+              <div class="panel panel-default m-t-md m-b-n-sm pos-rlt" style="margin-top: 0px;">
+                <form method="post" id="js_UserSendCommentForm{{ each_msg.id }}">
+                  <textarea class="form-control no-border" rows="4" name="UserComment"
+                            placeholder="我说一句 ..."></textarea>
+                  <input type="hidden" name="message_id" value="{{ each_msg.id }}">
+                </form>
+                <div class="panel-footer bg-light lter">
+                  <input type="button" class="btn btn-info pull-right btn-sm"
+                         id="js_UserSendCommentBtn{{ each_msg.id }}" value="回 复"
+                         style="width: 60px;">
+                  <ul class="nav nav-pills nav-sm">
+                    <li><a href=""><i class="fa fa-camera text-muted"></i></a></li>
+                  </ul>
+                </div>
+              </div>
+            {% endifnotequal %}
+
+            </div>
+          </div>
+        {% empty %}
+          <p style="text-align: center; padding-top: 20px;">暂无消息!</p>
+        {% endfor %}
+
+        <!-- 页码 -->
+        <div class="row">
+          <div class="col-md-12 text-center" style="margin-top: 30px;">
+            <ul class="pagination">
+              <!-- 上一页 -->
+              {% if user_msgs.has_previous %}
+                <li class="long"><a href="?{{ user_msgs.previous_page_number.querystring }}">上一页</a></li>
+              {% endif %}
+              <!-- 页码 -->
+              {% for page in user_msgs.pages %}
+                {% if page %}
+                  {% ifequal page user_msgs.number %}
+                    <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                            class="sr-only">(current)</span></a></li>
+                  {% else %}
+                    <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                  {% endifequal %}
+                {% else %}
+                  <li><a href="">...<span class="sr-only"></span></a></li>
+                {% endif %}
+              {% endfor %}
+              <!-- 下一页 -->
+              {% if user_msgs.has_next %}
+                <li><a href="?{{ user_msgs.next_page_number.querystring }}">下一页<span class="sr-only"></span></a></li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+
+  <script>
+      $(function () {
+          $("[data-toggle='tooltip']").tooltip();
+      });
+  </script>
+
+  <script>
+      $(function () {
+          // 发送通知
+          $('#js_UserSendMessageBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'message:send_message' %}",
+                  data: $('#js_UserSendMessageForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'message:message_list' %}";
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  {% for each_msg in user_msgs.object_list %}
+    <script>
+        $(function () {
+            // 发送回复
+            $('#js_UserSendCommentBtn{{ each_msg.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'message:send_comment' %}",
+                    data: $('#js_UserSendCommentForm{{ each_msg.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'message:message_list' %}";
+                        } else if (data.status == 'fail') {
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+
+    <script>
+        $(function () {
+            // 标记已读
+            $('#js_isNotReadBtn{{ each_msg.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'message:change_read' %}",
+                    data: $('#js_isNotReadForm{{ each_msg.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "";
+                        } else if (data.status == 'fail') {
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+
+    {% for each_comment in each_msg.usercomment_set.all %}
+      <script>
+          $(function () {
+              // 删除回复
+              $('#id_jsDelCommentBtn{{ each_comment.id }}').on('click', function () {
+                  $.ajax({
+                      cache: false,
+                      type: "POST",
+                      url: "{% url 'message:delete_comment' %}",
+                      data: $('#id_jsDelCommentForm{{ each_comment.id }}').serialize(),
+                      async: true,
+                      beforeSend: function (xhr, settings) {
+                          // 这里需要csrf_token的值，而不是代码
+                          xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                      },
+                      success: function (data) {
+                          if (data.status == 'success') {
+                              window.location.href = "{% url 'message:message_list' %}";
+                              window.alert(data.msg);
+                          } else if (data.status == 'fail') {
+                              window.alert(data.msg);
+                          }
+                      }
+                  });
+              });
+          })
+      </script>
+    {% endfor %}
+  {% endfor %}
+
+{% endblock other_js %}

@@ -1,0 +1,253 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}
+  {{ content_title }}
+{% endblock title %}
+
+
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder">
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;">
+              <a href="" style="font-size: 18px;">&nbsp;&nbsp;{{ content_title|safe }}</a>
+            </div>
+          </div>
+          <div class="panel-body" style="height: 745px;">
+
+            <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+              <div class="row">
+                <div class="col-sm-12">
+
+                  <a class="btn btn-sm btn-default btn-add" data-toggle="modal" data-target="#AddServiceModal"
+                     data-backdrop='static'>
+                    <i class="fa fa-plus"></i> 创建服务
+                  </a>
+
+                  <form class="navbar-form pull-right " role="search" style="margin-top: 0;">
+                    <div class="form-group">
+                      <span>共 <b style="color: orangered">{{ service_nums }}</b> 条&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                      <div class="input-group">
+                        <input type="text" name="keywords"
+                               class="form-control input-sm bg-light no-border rounded "
+                               placeholder="关键词搜索" style="width: 150px;">
+                        <span class="input-group-btn">
+                        <button type="submit" class="btn btn-sm bg-auto rounded"><i class="fa fa-search"></i></button>
+                      </span>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="row" style="overflow-y: auto; height: 630px;">
+                <div class="col-sm-12">
+
+                  <table class="table table-striped table-bordered table-hover dataTable no-footer" id="editable"
+                         role="grid">
+
+                    <!-- 标题行 -->
+                    <thead>
+                    <tr role="row">
+                      <th class="text-center" rowspan="1" colspan="1" style="width: 5%;">ID</th>
+                      <th class="text-center" rowspan="1" colspan="1">服务名称</th>
+                      <th class="text-center" rowspan="1" colspan="1">创建者</th>
+                      <th class="text-center" rowspan="1" colspan="1">创建时间</th>
+                      <th class="text-center" rowspan="1" colspan="1">操作</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for service in services.object_list %}
+                      <tr class="gradeX odd" role="row">
+                        <td class="text-center" style="vertical-align : middle;">{{ forloop.counter }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ service.name }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ service.add_user.nick_name }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ service.add_time }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          <a class="btn btn-xs btn-primary" data-toggle="modal"
+                             data-target="#EditServiceModal{{ service.id }}"
+                             data-backdrop='static'>编辑</a>
+                        </td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td colspan="5" style="text-align: center;">暂无服务！</td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 页码 -->
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <ul class="pagination" style="margin-top: 0px;">
+                  <!-- 上一页 -->
+                  {% if services.has_previous %}
+                    <li class="long"><a href="?{{ services.previous_page_number.querystring }}">上一页</a></li>
+                  {% endif %}
+                  <!-- 页码 -->
+                  {% for page in services.pages %}
+                    {% if page %}
+                      {% ifequal page services.number %}
+                        <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                                class="sr-only">(current)</span></a></li>
+                      {% else %}
+                        <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                      {% endifequal %}
+                    {% else %}
+                      <li><a href="">...<span class="sr-only"></span></a></li>
+                    {% endif %}
+                  {% endfor %}
+                  <!-- 下一页 -->
+                  {% if services.has_next %}
+                    <li><a href="?{{ services.next_page_number.querystring }}">下一页<span class="sr-only"></span></a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+  <!-- 添加任务 -->
+  <div class="modal inmodal" id="AddServiceModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog " style="padding-top: 10%; width: 400px;">
+      <div class="modal-content">
+        <div class="modal-header" style="min-height: 65px; background-color: #003366;">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                  style="margin-top: 8px; color: white;">x
+          </button>
+          <h4 class="control-label col-sm-6" id="addModalLabel" style="color: white;">新增服务</h4>
+        </div>
+        <form class="form-horizontal" id="js_AddServiceForm">
+          <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label">服务名称</label>
+              <div class="col-sm-8">
+                <input type="text" name="name" class="form-control" placeholder="输入服务的名称" maxlength="255">
+              </div>
+            </div>
+
+            <div class="modal-footer" style="padding-right: 35px;">
+              <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;"
+                      id="js_AddServiceBtn" formaction="">创建
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加任务提交 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#js_AddServiceBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'online_deploy:add_service' %}",
+                  data: $('#js_AddServiceForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'online_deploy:service_list' %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.location.href = "{% url 'online_deploy:service_list' %}";
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  {% for service in services.object_list %}
+    <!-- 修改任务 -->
+    <div class="modal inmodal" id="EditServiceModal{{ service.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog " style="padding-top: 10%; width: 400px;">
+        <div class="modal-content">
+          <div class="modal-header" style="min-height: 65px; background-color: #003366;">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                    style="margin-top: 8px; color: white;">x
+            </button>
+            <h4 class="control-label col-sm-6" id="addModalLabel" style="color: white;">修改服务</h4>
+          </div>
+          <form class="form-horizontal" id="js_EditServiceForm{{ service.id }}">
+            <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+              <div class="form-group">
+                <label class="col-sm-3 control-label">服务名称</label>
+                <div class="col-sm-8">
+                  <input type="text" name="name" class="form-control" value="{{ service.name }}" placeholder="输入服务的名称"
+                         maxlength="255">
+                </div>
+              </div>
+
+              <div class="modal-footer" style="padding-right: 35px;">
+                <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;"
+                        id="js_EditServiceBtn{{ service.id }}" formaction="">修改
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_EditServiceBtn{{ service.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'online_deploy:change_service' service.id %}",
+                    data: $('#js_EditServiceForm{{ service.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'online_deploy:service_list' %}";
+                            window.alert(data.msg);
+                        } else if (data.status == 'fail') {
+                            window.location.href = "{% url 'online_deploy:service_list' %}";
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+  {% endfor %}
+{% endblock other_js %}

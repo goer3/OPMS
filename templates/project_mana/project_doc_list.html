@@ -1,0 +1,346 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+{% load project_tags %}
+
+
+
+{% block title %}
+  安装文档
+{% endblock title %}
+
+
+{% block other_css %}
+  <script src="{% static 'ckeditor/ckeditor.js' %}"></script>
+  <link rel="stylesheet" href="{% static 'record/down_style.css' %}" type="text/css">
+  <link rel="stylesheet" href="{% static 'bootstrap_date/bootstrap-select.css' %}" type="text/css">
+{% endblock other_css %}
+
+
+{% block web_content %}
+  <!-- 内容主体 -->
+  <div class="app-content">
+    <a href class="off-screen-toggle hide" data-toggle="class:off-screen" data-target=".app-aside"></a>
+    <div class="app-content-body fade-in-up">
+
+      <div class="hbox hbox-auto-xs hbox-auto-sm">
+
+        <div class="col">
+          <p style="height: 2px;"></p>
+          <!-- 中间栏 -->
+          <div class="padder">
+            <!-- 用户反馈 -->
+            <div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+                    <span>&nbsp;&nbsp;{{ content_title|safe }}</span>
+                  </div>
+                </div>
+                <div class="panel-body" style="height: 745px;">
+
+                  <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+
+                    <!-- 添加搜索栏 -->
+                    <div class="row">
+                      <div class="col-sm-12" style="margin-left: 15px;">
+
+                        <a class="btn btn-sm btn-default btn-add" data-toggle="modal" data-backdrop='static'
+                           data-target="#AddEditModal">
+                          <i class="fa fa-plus"></i> 添加文档
+                        </a>
+
+                        <form class="navbar-form pull-right " role="search" style="margin-top: 0; margin-right: 15px; ">
+                          <div class="form-group">
+                            <span>共 <b style="color: orangered">{{ doc_nums }}</b> 条&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            <div class="input-group">
+                              <input type="text" class="form-control input-sm bg-light no-border rounded "
+                                     placeholder="关键词搜索" name="keywords" style="width: 150px;">
+                              <span class="input-group-btn">
+                                <button type="submit" class="btn btn-sm bg-auto rounded"><i
+                                        class="fa fa-search"></i></button>
+                              </span>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+
+                    <div class="row" style="height: 600px;">
+                      <div class="col-sm-12">
+
+                        {% for doc in docs.object_list %}
+                          <div class="col-sm-4">
+                            <div class="panel panel-colorful">
+                              <div class="panel-heading" style="background-color: #003366; color: white;">
+                                <h3 class="panel-title">{{ doc.doc_title }}</h3>
+                              </div>
+                              <div class="panel-body">
+                                <div class="col-sm-8">
+                                  <a href="{% url 'project_mana:install_doc_detail' doc.id %}"
+                                     style="color: #003366;">{{ doc.doc_content|slice:'15' }}...</a>
+                                </div>
+                                <div class="col-sm-4">
+                                <span>
+                                  <a data-toggle="modal" data-backdrop='static' data-target="#ManaDocModal{{ doc.id }}"
+                                     style="color: #003366">管理</a>
+                                  |
+                                  <a href="{% url 'project_mana:install_doc_detail' doc.id %}" style="color: #003366">查看全文</a>
+                                </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        {% endfor %}
+
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 页码 -->
+                  <div class="row">
+                    <div class="col-md-12 text-center">
+                      <ul class="pagination" style="margin-top: 0px;">
+                        <!-- 上一页 -->
+                        {% if docs.has_previous %}
+                          <li class="long"><a href="?{{ docs.previous_page_number.querystring }}">上一页</a></li>
+                        {% endif %}
+                        <!-- 页码 -->
+                        {% for page in docs.pages %}
+                          {% if page %}
+                            {% ifequal page docs.number %}
+                              <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                                      class="sr-only">(current)</span></a></li>
+                            {% else %}
+                              <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                            {% endifequal %}
+                          {% else %}
+                            <li><a href="">...<span class="sr-only"></span></a></li>
+                          {% endif %}
+                        {% endfor %}
+                        <!-- 下一页 -->
+                        {% if docs.has_next %}
+                          <li><a href="?{{ docs.next_page_number.querystring }}">下一页<span
+                                  class="sr-only"></span></a>
+                          </li>
+                        {% endif %}
+                      </ul>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- 右边栏 -->
+        <div class="col w-lg bg-light lter b-l bg-auto">
+          <div class="wrapper">
+            <div class="">
+              <h5 class="m-t-xs m-b-xs">分类归档</h5>
+              <hr>
+              <ul id="accordion" class="accordion" style="overflow-y: auto; height: 630px;">
+                {% for tag in tags %}
+                  <li>
+                    {% get_tag_doc tag.id as doc_list %}
+                    {% if doc_list %}
+                      <div class="link">
+                        {{ tag.name }}
+                        <b class="badge bg-info pull-right" style="margin-right: 30px;">{{ doc_list|length }}</b>
+                        <i class="fa fa-chevron-down"></i>
+                      </div>
+                      <ul class="submenu">
+                        {% for doc in doc_list %}
+                          <li>
+                            <a href="{% url 'project_mana:install_doc_detail' doc.id %}">【{{ forloop.counter }}】{{ doc.doc_title }}</a>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                    {% endif %}
+                  </li>
+                {% endfor %}
+              </ul>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- 内容主体 -->
+{% endblock web_content %}
+
+
+{% block other_js %}
+  <!-- 添加文档-->
+  <div class="modal fade" id="AddEditModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header" style="background-color: #003366; color: white;">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" style="color: white">&times;</span>
+          </button>
+          <h4 class="modal-title">新增文档</h4>
+        </div>
+        <div class="modal-body" style="height: 740px;">
+
+          <form method="post" class="form-horizontal" id="js_addDocForm">
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">标题</label>
+                <div class="col-md-10">
+                  <input type="text" name="doc_title" value="" maxlength="20" class="form-control" placeholder="输入文档标题"
+                         required="">
+                </div>
+              </div>
+            </div>
+
+            <div class="col-sm-6">
+              <div class="form-group">
+                <label class="col-md-2 control-label">标签</label>
+                <div class="col-md-10">
+                  <select id="id_select" name="doc_tag" class="selectpicker form-control" multiple=""
+                          data-live-search="true"
+                          style="display: none;">
+                    {% for tag in tags %}
+                      <option value="{{ tag.id }}">{{ tag.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="col-sm-12">
+              <textarea name="doc_content" class="ckeditor" placeholder="运维文档"></textarea>
+            </div>
+
+            <!-- 设置编辑框高度 -->
+            <script>
+                CKEDITOR.replace('doc_content', {
+                    height: 550
+                });
+            </script>
+
+          </form>
+        </div>
+        <div class="modal-footer">
+          <input type="button" id="js_addDocBtn"
+                 style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;"
+                 value="保存">
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加文档提交 -->
+  <script>
+      $(function () {
+          //处理CKEDITOR的值
+          function CKupdate() {
+              for (instance in CKEDITOR.instances)
+                  CKEDITOR.instances[instance].updateElement();
+          }
+
+          // 提交表单
+          $('#js_addDocBtn').on('click', function () {
+              CKupdate();
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'project_mana:add_install_doc' %}",
+                  data: $('#js_addDocForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'project_mana:install_doc_list' %}";
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+
+  <!-- 管理分类 -->
+  {% for doc in docs.object_list %}
+    <div class="modal fade" id="ManaDocModal{{ doc.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog" style="width: 300px;padding-top: 10%;">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: #003366; color: white;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+            <h4 class="modal-title">文档管理</h4>
+          </div>
+          <form class="form-horizontal" id="js_manaDocForm{{ doc.id }}">
+            <div class="modal-body" style="height: 50px;">
+
+              <div class="col-sm-6">
+                是否删除该文档
+              </div>
+              <div class="col-sm-3"></div>
+              <div class="col-sm-2">
+                <input type="hidden" name="doc_id" value="{{ doc.id }}">
+                <input type="button" id="js_manaDocBtn{{ doc.id }}" class="no-border"
+                       style="background-color: white; color: orangered;" value="删除">
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 管理文档 -->
+    <script>
+        $('#js_manaDocBtn{{ doc.id }}').on('click', function () {
+            $.ajax({
+                cache: false,
+                type: "POST",
+                url: "{% url 'project_mana:mana_install_doc' %}",
+                data: $('#js_manaDocForm{{ doc.id }}').serialize(),
+                async: true,
+                beforeSend: function (xhr, settings) {
+                    // 这里需要csrf_token的值，而不是代码
+                    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                },
+                success: function (data) {
+                    if (data.status == 'success') {
+                        window.location.href = "{% url 'project_mana:install_doc_list' %}";
+                        window.alert(data.msg);
+                    } else if (data.status == 'fail') {
+                        window.alert(data.msg);
+                    }
+                }
+            });
+        })
+    </script>
+  {% endfor %}
+
+  <script src="{% static 'record/down_index.js' %}"></script>
+  <script src="{% static 'bootstrap_date/bootstrap-select.js' %}"></script>
+
+  <!-- 下拉选择框 -->
+  <script type="text/javascript">
+      $(window).on('load', function () {
+          $('.selectpicker').selectpicker({
+              'selectedText': 'cat'
+          });
+      })
+  </script>
+
+  <script>
+      $('#AddEditModal').off('shown.bs.modal').on('shown.bs.modal', function (e) {
+          $(document).off('focusin.modal');
+      });
+  </script>
+{% endblock other_js %}

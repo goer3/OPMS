@@ -1,0 +1,279 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+{% block title %}
+  项目列表
+{% endblock title %}
+
+{% block other_css %}
+  <!-- 弹框详情css -->
+  <style>
+    .popover-title {
+      color: #3a3f51;
+      font-weight: bolder;
+    }
+
+    .popover {
+      background-color: #104E8B;
+      color: white;
+    }
+  </style>
+{% endblock other_css %}
+
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder">
+      <!-- 用户反馈 -->
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+              <span>&nbsp;&nbsp;{{ cate.name }} / 项目列表</span>
+            </div>
+          </div>
+          <div class="panel-body" style="height: 745px;">
+
+            <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+
+              <!-- 添加搜索栏 -->
+              <div class="row">
+                <div class="col-sm-12" style="margin-left: 15px;">
+                  <a class="btn btn-sm btn-default btn-add" data-toggle="modal" data-target="#addProModal"
+                     data-backdrop='static'>
+                    <i class="fa fa-plus"></i> 添加项目
+                  </a>
+
+                  <form class="navbar-form pull-right " role="search" style="margin-top: 0;margin-right: 15px;" >
+                    <div class="form-group">
+                      <span>共 <b style="color: orangered">{{ pro_nums }}</b> 条&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                      <div class="input-group">
+                        <input type="text" class="form-control input-sm bg-light no-border rounded "
+                               placeholder="关键词搜索" name="keywords" style="width: 150px;">
+                        <span class="input-group-btn">
+                          <button type="submit" class="btn btn-sm bg-auto rounded">
+                            <i class="fa fa-search"></i>
+                          </button>
+                        </span>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="row" style="height: 600px;">
+                <div class="col-sm-12">
+
+                  {% for project in projects.object_list %}
+                    <div class="col-sm-4">
+                      <div class="panel panel-colorful">
+                        <div class="panel-heading" style="background-color: #3a3f51; color: white;">
+                          <h3 class="panel-title">{{ project.name }}{% if not project.is_use %}
+                              <span style="color: orangered">&nbsp;&nbsp;&lt;项目已关闭&gt;</span>{% endif %}</h3>
+                        </div>
+                        <div class="panel-body">
+                          <div class="col-sm-8">
+                            <button style="color: #3a3f51; border: 0; background-color:#fff; padding-left: 0px"
+                                    title="项目说明" data-container="body" data-toggle="popover" data-trigger="hover"
+                                    data-placement="bottom" data-content="{{ project.desc }}">
+                              {{ project.desc|slice:'10' }}...
+                            </button>
+                          </div>
+                          <div class="col-sm-4">
+                                <span>
+                                  <a data-toggle="modal" data-backdrop='static' data-target="#ManaProModal{{ project.id }}"
+                                     style="color: #3a3f51">管理</a>
+                                  |
+                                  <a href="{% url 'project_mana:project_detail' cate.id project.id %}" style="color: #3a3f51">查看详情</a>
+                                </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  {% endfor %}
+
+                </div>
+              </div>
+            </div>
+
+            <!-- 页码 -->
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <ul class="pagination" style="margin-top: 0px;">
+                  <!-- 上一页 -->
+                  {% if projects.has_previous %}
+                    <li class="long"><a href="?{{ projects.previous_page_number.querystring }}">上一页</a></li>
+                  {% endif %}
+                  <!-- 页码 -->
+                  {% for page in projects.pages %}
+                    {% if page %}
+                      {% ifequal page projects.number %}
+                        <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                                class="sr-only">(current)</span></a></li>
+                      {% else %}
+                        <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                      {% endifequal %}
+                    {% else %}
+                      <li><a href="">...<span class="sr-only"></span></a></li>
+                    {% endif %}
+                  {% endfor %}
+                  <!-- 下一页 -->
+                  {% if projects.has_next %}
+                    <li><a href="?{{ projects.next_page_number.querystring }}">下一页<span class="sr-only"></span></a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+  <!-- 添加项目 -->
+  <div class="modal fade" id="addProModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header" style="background-color: #3a3f51; color: white;">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true" style="color: white">&times;</span>
+          </button>
+          <h4 class="modal-title">添加项目</h4>
+        </div>
+        <form class="form-horizontal" id="js_addProjectForm">
+          <div class="modal-body"  style="padding: 0; padding-top: 15px;">
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label">项目名称</label>
+              <div class="col-sm-8">
+                <input type="text" name="name" class="form-control" placeholder="输入项目名称"
+                       maxlength="255">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 control-label">项目说明</label>
+              <div class="col-sm-8">
+                <textarea class="form-control" name="desc" rows="5" placeholder="备注信息..."></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <input type="button" id="js_addProjectBtn"
+                     style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #3a3f51;border: 0;border-radius: 4px;color: white; margin-right: 30px;"
+                     value="添加">
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加项目提交 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#js_addProjectBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'project_mana:add_project' cate.id %}",
+                  data: $('#js_addProjectForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'project_mana:project_list' cate.id %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.location.href = "{% url 'project_mana:project_list' cate.id %}";
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+
+  {% for project in projects.object_list %}
+    <!-- 管理分类 -->
+    <div class="modal fade" id="ManaProModal{{ project.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog" style="width: 300px;padding-top: 10%;">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: #3a3f51; color: white;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+            <h4 class="modal-title">【开启 / 关闭】该项目</h4>
+          </div>
+          <form class="form-horizontal" id="js_manaProForm{{ project.id }}">
+            <div class="modal-body" style="height: 50px;">
+              <div class="col-sm-6">
+                项目状态
+              </div>
+              <div class="col-sm-2">
+              </div>
+              <div class="col-sm-4">
+                {% if project.is_use %}
+                  <input type="hidden" name="pro_status" value="on">
+                  <input type="button" id="js_manaProBtn{{ project.id }}" class="no-border"
+                         style="background-color: white; color: orangered;" value="点击关闭">
+                {% else %}
+                  <input type="hidden" name="pro_status" value="off">
+                  <input type="button" id="js_manaProBtn{{ project.id }}" class="no-border"
+                         style="background-color: white; color: green;" value="点击开启">
+                {% endif %}
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 管理项目提交 -->
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_manaProBtn{{ project.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'project_mana:mana_project' cate.id project.id %}",
+                    data: $('#js_manaProForm{{ project.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'project_mana:project_list' cate.id %}";
+                            window.alert(data.msg);
+                        } else if (data.status == 'fail') {
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+  {% endfor %}
+
+  <!-- 记录详情 -->
+  <script>
+      $(function () {
+          $("[data-toggle='popover']").popover();
+      });
+  </script>
+{% endblock other_js %}

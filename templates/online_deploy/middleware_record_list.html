@@ -1,0 +1,569 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}
+  {{ content_title }}
+{% endblock title %}
+
+{% block other_css %}
+  <!-- 弹框详情css -->
+  <style>
+    .popover-title {
+      color: #003366;
+      font-weight: bolder;
+    }
+
+    .popover {
+      background-color: #104E8B;
+      color: white;
+    }
+  </style>
+
+{% endblock other_css %}
+
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder">
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;">
+              <a href="" style="font-size: 18px;">&nbsp;&nbsp;{{ content_title|safe }}</a>
+            </div>
+          </div>
+          <div class="panel-body" style="height: 745px;">
+
+            <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+              <div class="row">
+                <div class="col-sm-12">
+
+                  <a class="btn btn-sm btn-default btn-add" data-toggle="modal" data-target="#AddMiddlewareModal"
+                     data-backdrop='static'>
+                    <i class="fa fa-plus"></i> 创建记录
+                  </a>
+
+                  <form class="navbar-form pull-right " role="search" style="margin-top: 0;">
+                    <div class="form-group">
+                      <span>共 <b style="color: orangered">{{ middleware_nums }}</b> 条&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                      <div class="input-group">
+                        <input type="text" name="keywords"
+                               class="form-control input-sm bg-light no-border rounded "
+                               placeholder="关键词搜索" style="width: 150px;">
+                        <span class="input-group-btn">
+                        <button type="submit" class="btn btn-sm bg-auto rounded"><i class="fa fa-search"></i></button>
+                      </span>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="row" style="overflow-y: auto; height: 630px;">
+                <div class="col-sm-12">
+
+                  <table class="table table-striped table-bordered table-hover dataTable no-footer" id="editable"
+                         role="grid">
+
+                    <!-- 标题行 -->
+                    <thead>
+                    <tr role="row">
+                      <th class="text-center" rowspan="1" colspan="1" style="width: 5%;">ID</th>
+                      <th class="text-center" rowspan="1" colspan="1">地区</th>
+                      <th class="text-center" rowspan="1" colspan="1">服务名称</th>
+                      <th class="text-center" rowspan="1" colspan="1">TOMCAT版本</th>
+                      <th class="text-center" rowspan="1" colspan="1">JDK版本</th>
+                      <th class="text-center" rowspan="1" colspan="1">其它版本</th>
+                      <th class="text-center" rowspan="1" colspan="1">创建者</th>
+                      <th class="text-center" rowspan="1" colspan="1">备注</th>
+                      <th class="text-center" rowspan="1" colspan="1">创建时间</th>
+                      <th class="text-center" rowspan="1" colspan="1">操作</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for middleware in middlewares.object_list %}
+                      <tr class="gradeX odd" role="row">
+                        <td class="text-center" style="vertical-align : middle;">{{ forloop.counter }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          {{ middleware.pro.name }}{{ middleware.city.name }}{{ middleware.area.name }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ middleware.service.name }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ middleware.tomcat_version }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ middleware.jdk_version }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          {% if middleware.other_version %}
+                            <button style="color: #104E8B; border: none; background:none" title="其他版本"
+                                    data-container="body" data-toggle="popover" data-trigger="hover"
+                                    data-placement="top" data-content="{{ middleware.other_version }}">
+                              {{ middleware.other_version|slice:'10' }}...
+                            </button>
+                          {% else %}
+                            暂无
+                          {% endif %}
+                        </td>
+                        <td class="text-center"
+                            style="vertical-align : middle;">{{ middleware.add_user.nick_name }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          {% if middleware.ps %}
+                            <button style="color: #104E8B; border: none; background:none" title="备注"
+                                    data-container="body" data-toggle="popover" data-trigger="hover"
+                                    data-placement="top" data-content="{{ middleware.ps }}">
+                              {{ middleware.ps|slice:'10' }}...
+                            </button>
+                          {% else %}
+                            暂无
+                          {% endif %}
+                        </td>
+                        <td class="text-center" style="vertical-align : middle;">{{ middleware.add_time }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          <a class="btn btn-xs btn-primary" data-toggle="modal"
+                             data-target="#EditMiddlewareModal{{ middleware.id }}"
+                             data-backdrop='static'>编辑</a>
+                          <a class="btn btn-xs btn-danger" data-toggle="modal"
+                             data-target="#DeleteMiddlewareModal{{ middleware.id }}"
+                             data-backdrop='static'>删除</a>
+                        </td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td colspan="10" style="text-align: center;">暂无记录！</td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 页码 -->
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <ul class="pagination" style="margin-top: 0px;">
+                  <!-- 上一页 -->
+                  {% if middlewares.has_previous %}
+                    <li class="long"><a href="?{{ middlewares.previous_page_number.querystring }}">上一页</a></li>
+                  {% endif %}
+                  <!-- 页码 -->
+                  {% for page in middlewares.pages %}
+                    {% if page %}
+                      {% ifequal page middlewares.number %}
+                        <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                                class="sr-only">(current)</span></a></li>
+                      {% else %}
+                        <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                      {% endifequal %}
+                    {% else %}
+                      <li><a href="">...<span class="sr-only"></span></a></li>
+                    {% endif %}
+                  {% endfor %}
+                  <!-- 下一页 -->
+                  {% if middlewares.has_next %}
+                    <li><a href="?{{ middlewares.next_page_number.querystring }}">下一页<span class="sr-only"></span></a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+  <link rel="stylesheet" href="{% static 'bootstrap_date/bootstrap-select.css' %}" type="text/css">
+  <script src="{% static 'bootstrap_date/bootstrap-select.js' %}"></script>
+
+  <!-- 下拉选择框 -->
+  <script type="text/javascript">
+      $(window).on('load', function () {
+          $('.selectpicker').selectpicker({
+              'selectedText': 'cat'
+          });
+      })
+  </script>
+
+  <!-- 记录详情 -->
+  <script>
+      $(function () {
+          $("[data-toggle='popover']").popover();
+      });
+  </script>
+
+  <!-- 添加任务 -->
+  <div class="modal inmodal" id="AddMiddlewareModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog " style="padding-top: 5%;">
+      <div class="modal-content">
+        <div class="modal-header" style="min-height: 65px; background-color: #003366;">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                  style="margin-top: 8px; color: white;">x
+          </button>
+          <h4 class="control-label col-sm-6" id="addModalLabel" style="color: white;">新增记录</h4>
+        </div>
+        <form class="form-horizontal" id="js_AddMiddlewareForm">
+          <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">地区选择</label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="pro_add" class="form-control" name="pro">
+                  <option value="">请选择省</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label"></label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="city_add" class="form-control" name="city">
+                  <option value="">请选择市</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label"></label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="area_add" class="form-control" name="area">
+                  <option value="">请选择区县</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">服务名称</label>
+              <div class="col-sm-8 col-lg-8">
+                <select name="service" class="selectpicker form-control">
+                  {% for service in services %}
+                    <option value="{{ service.id }}">{{ service.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">TOMCAT版本</label>
+              <div class="col-sm-8 col-lg-8">
+                <input type="text" name="tomcat_version" class="form-control" placeholder="输入 TOMCAT 版本"
+                       maxlength="255">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">JDK 版本</label>
+              <div class="col-sm-8 col-lg-8">
+                <input type="text" name="jdk_version" class="form-control" placeholder="输入 JDK 版本" maxlength="255">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">其它版本</label>
+              <div class="col-sm-8 col-lg-8">
+                <input type="text" name="other_version" class="form-control" placeholder="输入其它服务版本（非必需）"
+                       maxlength="255">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">备注</label>
+              <div class="col-sm-8 col-lg-8">
+                <textarea class="form-control" name="ps" rows="3" placeholder="备注信息..."></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer" style="padding-right: 35px;">
+              <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;"
+                      id="js_AddMiddlewareBtn" formaction="">创建
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加记录地区选择 -->
+  <script>
+      $(function () {
+          //获取所有省份
+          $.get('/province/', function (dic) {
+              pro = $('#pro_add');
+              $.each(dic.data, function (index, item) {
+                  pro.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+              })
+          });
+          //获取市信息
+          $('#pro_add').change(function () {
+              $.get('/city_' + $(this).val() + '/', function (dict) {
+                  city = $('#city_add');
+                  city.empty().append('<option value="">请选择市</option>');
+                  $('#area_add').empty().append('<option value="">请选择区县</option>');
+                  $.each(dict.data, function (index, item) {
+                      city.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              });
+          });
+
+          //获取区县信息
+          $('#city_add').change(function () {
+              $.get('/area_' + $(this).val() + '/', function (dict) {
+                  county = $('#area_add');
+                  county.empty().append('<option value="">请选择区县</option>');
+                  $.each(dict.data, function (index, item) {
+                      county.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              })
+          });
+      })
+  </script>
+
+  <!-- 添加任务提交 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#js_AddMiddlewareBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'online_deploy:add_middleware' %}",
+                  data: $('#js_AddMiddlewareForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'online_deploy:middleware_list' %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.location.href = "{% url 'online_deploy:middleware_list' %}";
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  {% for middleware in middlewares.object_list %}
+    <!-- 修改任务 -->
+    <div class="modal inmodal" id="EditMiddlewareModal{{ middleware.id }}" tabindex="-1" role="dialog"
+         aria-hidden="true">
+      <div class="modal-dialog " style="padding-top: 10%;">
+        <div class="modal-content">
+          <div class="modal-header" style="min-height: 65px; background-color: #003366;">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                    style="margin-top: 8px; color: white;">x
+            </button>
+            <h4 class="control-label col-sm-6" id="addModalLabel" style="color: white;">修改记录</h4>
+          </div>
+          <form class="form-horizontal" id="js_EditMiddlewareForm{{ middleware.id }}">
+            <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">地区选择</label>
+                <div class="col-sm-8 col-lg-8">
+                  <select id="pro_change_{{ middleware.id }}" class="form-control" name="pro">
+                    <option value="{{ middleware.pro.id }}">{{ middleware.pro.name }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label"></label>
+                <div class="col-sm-8 col-lg-8">
+                  <select id="city_change_{{ middleware.id }}" class="form-control" name="city">
+                    <option value="{{ middleware.city.id }}">{{ middleware.city.name }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label"></label>
+                <div class="col-sm-8 col-lg-8">
+                  <select id="area_change_{{ middleware.id }}" class="form-control" name="area">
+                    <option value="{{ middleware.area.id }}">{{ middleware.area.name }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">服务名称</label>
+                <div class="col-sm-8 col-lg-8">
+                  <select name="service" class="selectpicker form-control">
+                    {% for service in services %}
+                      <option value="{{ service.id }}" {% ifequal middleware.service.id service.id %}selected{% endifequal %}>{{ service.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">TOMCAT版本</label>
+                <div class="col-sm-8 col-lg-8">
+                  <input type="text" name="tomcat_version" class="form-control" placeholder="输入 TOMCAT 版本"
+                         maxlength="255" value="{{ middleware.tomcat_version }}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">JDK 版本</label>
+                <div class="col-sm-8 col-lg-8">
+                  <input type="text" name="jdk_version" class="form-control" placeholder="输入 JDK 版本" maxlength="255" value="{{ middleware.jdk_version }}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">其它版本</label>
+                <div class="col-sm-8 col-lg-8">
+                  <input type="text" name="other_version" class="form-control" placeholder="输入其它服务版本（非必需）"
+                         maxlength="255" value="{% ifnotequal middleware.other_version None %}{{ middleware.other_version }}{% endifnotequal %}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">备注</label>
+                <div class="col-sm-8 col-lg-8">
+                  <textarea class="form-control" name="ps" rows="3" placeholder="备注信息...">{% ifnotequal middleware.ps None %}{{ middleware.ps }}{% endifnotequal %}</textarea>
+                </div>
+              </div>
+
+              <div class="modal-footer" style="padding-right: 35px;">
+                <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;"
+                        id="js_EditMiddlewareBtn{{ middleware.id }}" formaction="">修改
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 修改记录地区选择 -->
+    <script>
+        $(function () {
+            //获取所有省份
+            $.get('/province/', function (dic) {
+                pro = $('#pro_change_{{ middleware.id }}');
+                $.each(dic.data, function (index, item) {
+                    pro.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                })
+            });
+            //获取市信息
+            $('#pro_change_{{ middleware.id }}').change(function () {
+                $.get('/city_' + $(this).val() + '/', function (dict) {
+                    city = $('#city_change_{{ middleware.id }}');
+                    city.empty().append('<option value="">请选择市</option>');
+                    $('#area_change_{{ middleware.id }}').empty().append('<option value="">请选择区县</option>');
+                    $.each(dict.data, function (index, item) {
+                        city.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                    })
+                });
+            });
+
+            //获取区县信息
+            $('#city_change_{{ middleware.id }}').change(function () {
+                $.get('/area_' + $(this).val() + '/', function (dict) {
+                    county = $('#area_change_{{ middleware.id }}');
+                    county.empty().append('<option value="">请选择区县</option>');
+                    $.each(dict.data, function (index, item) {
+                        county.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                    })
+                })
+            });
+        })
+    </script>
+
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_EditMiddlewareBtn{{ middleware.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'online_deploy:change_middleware' middleware.id %}",
+                    data: $('#js_EditMiddlewareForm{{ middleware.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'online_deploy:middleware_list' %}";
+                            window.alert(data.msg);
+                        } else if (data.status == 'fail') {
+                            window.location.href = "{% url 'online_deploy:middleware_list' %}";
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+
+    <!-- 删除记录 -->
+    <div class="modal fade" id="DeleteMiddlewareModal{{ middleware.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+      <div class="modal-dialog modal-sm" style="padding-top: 10%">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: #003366; color: white;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+            <h4 class="modal-title">是否删除该记录？</h4>
+          </div>
+          <form class="form-horizontal" id="js_deleteMiddlewareForm{{ middleware.id }}">
+            <div class="modal-body" style="height: 50px;">
+              <div class="col-sm-6">
+                <input type="button" id="js_deleteMiddlewareBtn{{ middleware.id }}"
+                       style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;"
+                       value="确定">
+              </div>
+              <div class="col-sm-6">
+                <button style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;">
+                  取消
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 删除 -->
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_deleteMiddlewareBtn{{ middleware.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'online_deploy:delete_middleware' middleware.id %}",
+                    data: $('#js_deleteMiddlewareForm{{ middleware.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'online_deploy:middleware_list' %}";
+                        } else if (data.status == 'fail') {
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+  {% endfor %}
+{% endblock other_js %}

@@ -1,0 +1,899 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+{% load record_tags %}
+
+{% block title %}故障记录{% endblock title %}
+
+
+{% block other_css %}
+
+  <!-- 弹框详情css -->
+  <style>
+    .popover-title {
+      color: #003366;
+      font-weight: bolder;
+    }
+
+    .popover {
+      background-color: #104E8B;
+      color: white;
+    }
+  </style>
+
+{% endblock other_css %}
+
+
+{% block web_content %}
+  <!-- 内容主体 -->
+  <div class="app-content">
+    <a href class="off-screen-toggle hide" data-toggle="class:off-screen" data-target=".app-aside"></a>
+    <div class="app-content-body fade-in-up">
+
+      <div class="hbox hbox-auto-xs hbox-auto-sm">
+
+        <div class="col">
+          <p style="height: 2px;"></p>
+          <!-- 中间栏 -->
+          <div class="padder">
+            <!-- 用户反馈 -->
+            <div>
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+                    <span>&nbsp;&nbsp;{{ content_title|safe }}</span>
+                  </div>
+                </div>
+                <div class="panel-body" style="height: 745px;">
+
+                  <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+                    <div class="row">
+                      <div class="col-sm-6"></div>
+                      <div class="col-sm-6"></div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col-sm-12">
+
+                        {% ifequal web_func 'record_list' %}
+                          <a class="btn btn-sm btn-default btn-add" data-toggle="modal" aria-hidden='true'
+                             data-backdrop='static' data-target="#addRecordModal">
+                            <i class="fa fa-plus"></i> 添加记录
+                          </a>
+                        {% endifequal %}
+
+                        {% ifequal web_func 'record_archive' %}
+                          <a href="{% url 'record:record_archive' %}" class="btn btn-sm btn-default">
+                            <i class="fa fa-reply"></i> 返回分类
+                          </a>
+                        {% endifequal %}
+
+                        <form class="navbar-form pull-right " role="search" method="get" style="margin-top: 0px;">
+                          <div class="form-group">
+                            <span>共 <b style="color: orangered">{{ record_nums }}</b> 条&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                            <div class="input-group">
+                              <input type="text" name="keywords"
+                                     class="form-control input-sm bg-light no-border rounded" placeholder="关键词搜索"
+                                     style="width: 150px;">
+                              <span class="input-group-btn">
+                                <button type="submit" class="btn btn-sm bg-auto rounded"><i
+                                        class="fa fa-search"></i></button>
+                              </span>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+
+                    <div class="row" style="overflow-y: auto; height: 630px;">
+                      <div class="col-sm-12">
+
+                        <table class="table table-striped table-bordered table-hover dataTable no-footer"
+                               id="editable"
+                               role="grid">
+
+                          <!-- 标题行 -->
+                          <thead>
+                          <tr role="row">
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 10%;">地区</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 8%;">平台</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 12%;">故障</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 8%;">故障时间</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 9%;">故障原因</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 9%;">处理方法</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 6%;">处理人</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 8%;">处理时间</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 6%;">结果</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 9%;">备注</th>
+                            <th class="text-center" rowspan="1" colspan="1" style="width: 5%;">操作</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+
+                          {% for record in records.object_list %}
+                            <tr class="gradeX"
+                                role="row">
+                              <td class="text-center" style="vertical-align : middle;">
+                                {{ record.province.name }}{{ record.city.name }}{{ record.area.name }}</td>
+                              <td class="text-center" style="vertical-align : middle;">{{ record.platform }}</td>
+                              <td class="text-center" style="vertical-align : middle;">{{ record.incident }}</td>
+                              <td class="text-center" style="vertical-align : middle;">{{ record.start_time }}</td>
+                              <td class="text-center" style="vertical-align : middle;">
+                                <button style="color: #104E8B; border: none; background:none" title="故障原因"
+                                        data-container="body" data-toggle="popover" data-trigger="hover"
+                                        data-placement="top" data-content="{{ record.reason }}">
+                                  {{ record.reason|slice:'5' }}...
+                                </button>
+                              </td>
+
+                              <td class="text-center" style="vertical-align : middle;">
+                                <button style="color: #104E8B; border: none; background:none" title="处理办法"
+                                        data-container="body" data-toggle="popover" data-trigger="hover"
+                                        data-placement="top"
+                                        data-content="{{ record.handling_method }}">
+                                  {{ record.handling_method|slice:'5' }}...
+                                </button>
+                              </td>
+                              <!-- 获取 ManyToMany -->
+                              <td class="text-center" style="vertical-align : middle;">
+                                {% for each in record.handling_person.all %}
+                                  {{ each.nick_name }}
+                                {% endfor %}
+                              </td>
+                              <td class="text-center" style="vertical-align : middle;">{{ record.handling_time }}</td>
+                              <td class="text-center" style="vertical-align : middle;">
+                                {% ifequal record.result 0 %}
+                                  <span style="color: green">{{ record.get_result_display }}</span>
+                                {% endifequal %}
+                                {% ifequal record.result 1 %}
+                                  <span style="color: red">{{ record.get_result_display }}</span>
+                                {% endifequal %}
+                                {% ifequal record.result 2 %}
+                                  <span style="color: orange">{{ record.get_result_display }}</span>
+                                {% endifequal %}
+                              </td>
+                              <td class="text-center" style="vertical-align : middle;">
+                                {% if record.ps %}
+                                  <button style="color: #104E8B; border: none; background:none" title="备注"
+                                          data-container="body" data-toggle="popover" data-trigger="hover"
+                                          data-placement="top" data-content="{{ record.ps }}">
+                                    {{ record.ps|slice:'5' }}...
+                                  </button>
+                                {% else %}
+                                  暂无
+                                {% endif %}
+                              </td>
+
+                              <td class="text-center" style="vertical-align : middle;">
+                                {% if request.user.id in record.get_hand_user_list or request.user.is_superuser %}
+                                  <a class="btn btn-xs btn-info" data-toggle="modal" aria-hidden='true'
+                                     data-backdrop='static'
+                                     data-target="#changeRecordModal{{ record.id }}">编辑</a>
+                                {% else %}
+                                  <a class="btn btn-xs" style="background-color: #c1c3c9; color: white;"
+                                     data-toggle="modal">无权</a>
+                                {% endif %}
+                              </td>
+                            </tr>
+                          {% endfor %}
+
+                          </tbody>
+                        </table>
+
+                      </div>
+                    </div>
+
+                  </div>
+
+                  <!-- 页码 -->
+                  <div class="row">
+                    <div class="col-md-12 text-center">
+                      <ul class="pagination"  style="margin-top: 0px;">
+                        <!-- 上一页 -->
+                        {% if records.has_previous %}
+                          <li class="long"><a href="?{{ records.previous_page_number.querystring }}">上一页</a></li>
+                        {% endif %}
+                        <!-- 页码 -->
+                        {% for page in records.pages %}
+                          {% if page %}
+                            {% ifequal page records.number %}
+                              <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                                      class="sr-only">(current)</span></a></li>
+                            {% else %}
+                              <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                            {% endifequal %}
+                          {% else %}
+                            <li><a href="">...<span class="sr-only"></span></a></li>
+                          {% endif %}
+                        {% endfor %}
+                        <!-- 下一页 -->
+                        {% if records.has_next %}
+                          <li><a href="?{{ records.next_page_number.querystring }}">下一页<span class="sr-only"></span></a>
+                          </li>
+                        {% endif %}
+                      </ul>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 右边栏 -->
+        <div class="col w-lg bg-light lter b-l bg-auto">
+          <div class="wrapper">
+            <div class="">
+              <h5 class="m-t-xs m-b-xs">查询导出</h5>
+              <hr>
+              <ul class="list-group no-bg no-borders pull-in">
+                <!-- 查询条件 -->
+                <li class="list-group-item">
+                  <form class="form-horizontal" method="get" style="padding-top: 0px;">
+                    <div class="modal-body" style="padding-top: 0px;">
+                      <div class="form-group">
+                        <label class=""><i class="glyphicon glyphicon-map-marker"></i>&nbsp;&nbsp;地区选择</label>
+                        <div>
+                          <select id="pro_search" class="form-control" name="province">
+                            {% if search_province %}
+                              <option value="{{ search_province }}">{% get_province_name search_province %}</option>
+                            {% else %}
+                              <option value="">请选择省</option>
+                            {% endif %}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <div>
+                          <select id="city_search" class="form-control" name="city">
+                            {% if search_city %}
+                              <option value="{{ search_city }}">{% get_city_name search_city %}</option>
+                            {% else %}
+                              <option value="">请选择市</option>
+                            {% endif %}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <div>
+                          <select id="area_search" class="form-control" name="area">
+                            {% if search_area %}
+                              <option value="{{ search_area }}">{% get_area_name search_area %}</option>
+                            {% else %}
+                              <option value="">请选择区县</option>
+                            {% endif %}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="form-group" style="padding-top: 5px;">
+                        <label><i class="glyphicon glyphicon-time"></i>&nbsp;&nbsp;开始时间</label>
+                        <div>
+                          <div class="input-group date" id='datetimepicker_search1'>
+                            <span class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </span>
+                            <input name="start_time" type="text" class="form-control" value="{% if search_start_time %}{{ search_start_time }}{% endif %}">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="form-group" style="padding-top: 5px;">
+                        <label><i class="glyphicon glyphicon-time"></i>&nbsp;&nbsp;结束时间</label>
+                        <div>
+                          <div class="input-group date" id='datetimepicker_search2'>
+                            <span class="input-group-addon">
+                              <i class="fa fa-calendar"></i>
+                            </span>
+                            <input name="stop_time" type="text" class="form-control" value="{% if search_stop_time %}{{ search_stop_time }}{% endif %}">
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="form-group" style="padding-top: 5px;">
+                        <label><i class="glyphicon glyphicon-tag"></i>&nbsp;&nbsp;记录标签</label>
+                        <div>
+                          <select id="id_select" name="tag" class="selectpicker form-control" multiple=""
+                                  data-live-search="true" style="display: none;">
+                            {% for tag in tag_list %}
+                              <option value="{{ tag.id }}" {% if tag.id in search_tag %}selected{% endif %}>{{ tag.name }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="form-group" style="padding-top: 5px;">
+                        <label><i class="glyphicon glyphicon-user"></i>&nbsp;&nbsp;处理人员</label>
+                        <div>
+                          <select id="id_select" name="user" class="selectpicker form-control" multiple=""
+                                  data-live-search="true" style="display: none;">
+                            {% for user in user_list %}
+                              <option value="{{ user.id }}" {% if user.id in search_user %}selected{% endif %}>{{ user.nick_name }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="form-group" style="padding-top: 5px;">
+                        <label><i class="glyphicon glyphicon-check"></i>&nbsp;&nbsp;处理结果</label>
+                        <div>
+                          <select name="result" class="selectpicker form-control" style="display: none;">
+                            <option value="all" {% ifequal search_result 'all' %}selected{% endifequal %}{% ifequal search_result '' %}selected{% endifequal %}>全部</option>
+                            <option value="0" {% ifequal search_result '0' %}selected{% endifequal %}>已完成</option>
+                            <option value="1" {% ifequal search_result '1' %}selected{% endifequal %}>未完成</option>
+                            <option value="2" {% ifequal search_result '2' %}selected{% endifequal %}>暂无法处理</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div class="form-group">
+                        <button type="submit" formaction="{% url 'record:record_list' %}"
+                                class="btn btn-sm btn-block btn-info">搜索记录
+                        </button>
+                      </div>
+
+                      <div class="form-group">
+                        <button type="submit" formaction="{% url 'record:record_list' %}" name="export" class="btn btn-sm btn-block btn-info" value="search">条件导出</button>
+                      </div>
+
+                      <div class="form-group">
+                        <button type="submit" formaction="{% url 'record:record_list' %}" name="export" class="btn btn-sm btn-block btn-info" value="all">全部导出</button>
+                      </div>
+
+                    </div>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <!-- 内容主体 -->
+
+{% endblock web_content %}
+
+
+
+{% block other_js %}
+  <link rel="stylesheet" href="{% static 'bootstrap_date/bootstrap-select.css' %}" type="text/css">
+  <script src="{% static 'bootstrap_date/bootstrap-select.js' %}"></script>
+
+  <script src="{% static 'bootstrap_date/moment-with-locales.min.js' %}"></script>
+  <link href="{% static 'bootstrap_date/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+  <script src="{% static 'bootstrap_date/bootstrap-datetimepicker.min.js' %}"></script>
+
+  <!-- 下拉选择框 -->
+  <script type="text/javascript">
+      $(window).on('load', function () {
+          $('.selectpicker').selectpicker({
+              'selectedText': 'cat'
+          });
+      })
+  </script>
+
+
+  <!-- 记录详情 -->
+  <script>
+      $(function () {
+          $("[data-toggle='popover']").popover();
+      });
+  </script>
+
+
+  <!------------------------------------------------ 添加记录 ---------------------------------------------------------->
+  <!-- 添加记录 -->
+  <div class="modal inmodal" id="addRecordModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header" style="min-height: 60px; background-color: #003366;">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: 8px; color: white;">x</button>
+          <h4 class="control-label col-sm-3 col-lg-3" id="addModalLabel" style="color: white;">新增记录</h4>
+        </div>
+        <form class="form-horizontal" id="js_AddRecordForm">
+          {% csrf_token %}
+          <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">地区选择</label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="pro_add" class="form-control" name="province">
+                  <option value="">请选择省</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label"></label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="city_add" class="form-control" name="city">
+                  <option value="">请选择市</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label"></label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="area_add" class="form-control" name="area">
+                  <option value="">请选择区县</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">故障平台</label>
+              <div class="col-sm-8 col-lg-8">
+                <input type="text" name="platform" class="form-control" placeholder="输入故障的平台" maxlength="255">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">故障事件</label>
+              <div class="col-sm-8 col-lg-8">
+                <input type="text" name="incident" class="form-control" placeholder="输入故障的事件" maxlength="255">
+              </div>
+            </div>
+
+            <div class="form-group ">
+              <label class="col-sm-3 col-lg-3 control-label">故障时间</label>
+              <div class="col-sm-8 col-lg-8">
+                <div class="input-group date" id='datetimepicker_add1'>
+                  <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                  <input name="start_time" type="text" class="form-control" value="">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">故障原因</label>
+              <div class="col-sm-8 col-lg-8">
+                <textarea class="form-control" rows="3" name="reason" placeholder="输入故障的原因"></textarea>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">处理人员</label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="id_select" name="handling_person" class="selectpicker bla bli form-control" multiple=""
+                        data-live-search="true" style="display: none;">
+                  {% for user in user_list %}
+                    <option value="{{ user.id }}">{{ user.nick_name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group ">
+              <label class="col-sm-3 col-lg-3 control-label">处理时间</label>
+              <div class="col-sm-8 col-lg-8">
+                <div class="input-group date" id='datetimepicker_add2'>
+                  <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                  <input name="handling_time" type="text" class="form-control" value="">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">处理方法</label>
+              <div class="col-sm-8 col-lg-8">
+                <textarea class="form-control" rows="3" name="handling_method" placeholder="处理办法"></textarea>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">记录标签</label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="id_select" name="tag" class="selectpicker bla bli form-control" multiple=""
+                        data-live-search="true" style="display: none;">
+                  {% for tag in tag_list %}
+                    <option value="{{ tag.id }}">{{ tag.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">处理结果</label>
+              <div class="col-sm-8 col-lg-8">
+                <select name="result" class="selectpicker form-control" style="display: none;">
+                  <option value="0" selected>已完成</option>
+                  <option value="1">未完成</option>
+                  <option value="2">暂无法处理</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">备注</label>
+              <div class="col-sm-8 col-lg-8">
+                <textarea class="form-control" name="ps" rows="3" placeholder="备注信息..."></textarea>
+              </div>
+            </div>
+
+          <div class="modal-footer">
+            <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;" id="js_AddRecordBtn" formaction="">添加</button>
+          </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加记录时间选择器 -->
+  <script>
+      $('#datetimepicker_add1').datetimepicker({
+          format: 'YYYY-MM-DD HH:mm',
+          locale: moment.locale('zh-cn')
+      });
+
+      $('#datetimepicker_add2').datetimepicker({
+          format: 'YYYY-MM-DD HH:mm',
+          locale: moment.locale('zh-cn')
+      });
+  </script>
+
+  <!-- 添加记录地区选择 -->
+  <script>
+      $(function () {
+          //获取所有省份
+          $.get('/province/', function (dic) {
+              pro = $('#pro_add');
+              $.each(dic.data, function (index, item) {
+                  pro.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+              })
+          });
+          //获取市信息
+          $('#pro_add').change(function () {
+              $.get('/city_' + $(this).val() + '/', function (dict) {
+                  city = $('#city_add');
+                  city.empty().append('<option value="">请选择市</option>');
+                  $('#area_add').empty().append('<option value="">请选择区县</option>');
+                  $.each(dict.data, function (index, item) {
+                      city.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              });
+          });
+
+          //获取区县信息
+          $('#city_add').change(function () {
+              $.get('/area_' + $(this).val() + '/', function (dict) {
+                  county = $('#area_add');
+                  county.empty().append('<option value="">请选择区县</option>');
+                  $.each(dict.data, function (index, item) {
+                      county.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              })
+          });
+      })
+  </script>
+
+  <!-- 添加记录提交 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#js_AddRecordBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'record:add_record' %}",
+                  data: $('#js_AddRecordForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'record:record_list' %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.location.href = "{% url 'record:record_list' %}";
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+  <!------------------------------------------------ 添加记录 ---------------------------------------------------------->
+
+
+  <!------------------------------------------------ 修改记录 ---------------------------------------------------------->
+  <!-- 修改记录 -->
+  {% for record in records.object_list %}
+    {% if request.user.id in record.get_hand_user_list or request.user.is_superuser %}
+      <div class="modal inmodal" id="changeRecordModal{{ record.id }}" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header" style="min-height: 60px; background-color: #003366;">
+              <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="margin-top: 8px; color: white;">×
+              </button>
+              <h4 class="control-label col-sm-3 col-lg-3" style="color: white;" id="changeModalLabel">修改记录</h4>
+            </div>
+            <form class="form-horizontal" id="js_ChangeRecordForm{{ record.id }}">
+              <div class="modal-body" style="padding: 0; margin-top: 15px">
+
+                <input type="hidden" name="record_id" value="{{ record.id }}">
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">地区选择</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <select id="pro_change_{{ record.id }}" class="form-control" name="province">
+                      <option value="{{ record.province.id }}">{{ record.province.name }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label"></label>
+                  <div class="col-sm-8 col-lg-8">
+                    <select id="city_change_{{ record.id }}" class="form-control" name="city">
+                      <option value="{{ record.city.id }}">{{ record.city.name }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label"></label>
+                  <div class="col-sm-8 col-lg-8">
+                    <select id="area_change_{{ record.id }}" class="form-control" name="area">
+                      <option value="{{ record.area.id }}">{{ record.area.name }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">故障平台</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <input type="text" name="platform" class="form-control" value="{{ record.platform }}"
+                           maxlength="255">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">故障事件</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <input type="text" name="incident" class="form-control" value="{{ record.incident }}"
+                           maxlength="255">
+                  </div>
+                </div>
+
+                <div class="form-group ">
+                  <label class="col-sm-3 col-lg-3 control-label">故障时间</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <div class="input-group date" id='datetimepicker1_change{{ record.id }}'>
+                                                  <span class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                  </span>
+                      <input name="start_time" type="text" class="form-control" value="{{ record.start_time }}">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">故障原因</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <input type="text" name="reason" class="form-control" value="{{ record.reason }}" maxlength="255">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">处理人员</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <select id="id_select" name="handling_person" class="selectpicker bla bli form-control" multiple=""
+                            data-live-search="true" style="display: none;">
+                      {% for user in user_list %}
+                        <option value="{{ user.id }}"
+                                {% if user.id in record.get_hand_user_list %}selected{% endif %}>{{ user.nick_name }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group ">
+                  <label class="col-sm-3 col-lg-3 control-label">处理时间</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <div class="input-group date" id='datetimepicker2_change{{ record.id }}'>
+                                                  <span class="input-group-addon">
+                                                    <i class="fa fa-calendar"></i>
+                                                  </span>
+                      <input name="handling_time" type="text" class="form-control" value="{{ record.handling_time }}">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">处理方法</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <textarea class="form-control" name="handling_method" rows="3"
+                              placeholder="处理办法">{{ record.handling_method }}</textarea>
+                  </div>
+                </div>
+
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">记录标签</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <select id="id_select" name="tag" class="selectpicker bla bli form-control" multiple=""
+                            data-live-search="true" style="display: none;">
+                      {% for tag in tag_list %}
+                        <option value="{{ tag.id }}" {% if tag.id in record.get_tag_list %}selected{% endif %}>{{ tag.name }}</option>
+                      {% endfor %}
+                    </select>
+
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">处理结果</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <select name="result" class="selectpicker form-control" style="display: none;">
+                      <option value="0" {% ifequal record.result 0 %}selected{% endifequal %}>已完成</option>
+                      <option value="1" {% ifequal record.result 1 %}selected{% endifequal %}>未完成</option>
+                      <option value="2" {% ifequal record.result 2 %}selected{% endifequal %}>暂无法处理</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="col-sm-3 col-lg-3 control-label">备注</label>
+                  <div class="col-sm-8 col-lg-8">
+                    <textarea class="form-control" rows="3" name="ps" placeholder="备注信息...">{{ record.ps }}</textarea>
+                  </div>
+                </div>
+
+              <div class="modal-footer">
+                    <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;" id="js_ChangeRecordBtn{{ record.id }}" formaction="">修改
+                    </button>
+              </div>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- 修改记录时间选择器 -->
+      <script>
+          $('#datetimepicker1_change{{ record.id }}').datetimepicker({
+              format: 'YYYY-MM-DD HH:mm',
+              locale: moment.locale('zh-cn')
+          });
+
+          $('#datetimepicker2_change{{ record.id }}').datetimepicker({
+              format: 'YYYY-MM-DD HH:mm',
+              locale: moment.locale('zh-cn')
+          });
+      </script>
+
+      <!-- 修改记录地区选择 -->
+      <script>
+          $(function () {
+              //获取所有省份
+              $.get('/province/', function (dic) {
+                  pro = $('#pro_change_{{ record.id }}');
+                  $.each(dic.data, function (index, item) {
+                      pro.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              });
+              //获取市信息
+              $('#pro_change_{{ record.id }}').change(function () {
+                  $.get('/city_' + $(this).val() + '/', function (dict) {
+                      city = $('#city_change_{{ record.id }}');
+                      city.empty().append('<option value="">请选择市</option>');
+                      $('#area_change_{{ record.id }}').empty().append('<option value="">请选择区县</option>');
+                      $.each(dict.data, function (index, item) {
+                          city.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                      })
+                  });
+              });
+
+              //获取区县信息
+              $('#city_change_{{ record.id }}').change(function () {
+                  $.get('/area_' + $(this).val() + '/', function (dict) {
+                      county = $('#area_change_{{ record.id }}');
+                      county.empty().append('<option value="">请选择区县</option>');
+                      $.each(dict.data, function (index, item) {
+                          county.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                      })
+                  })
+              });
+          })
+      </script>
+
+      <!-- 添加记录提交 -->
+      <script>
+          $(function () {
+              // 提交表单
+              $('#js_ChangeRecordBtn{{ record.id }}').on('click', function () {
+                  $.ajax({
+                      cache: false,
+                      type: "POST",
+                      url: "{% url 'record:change_record' %}",
+                      data: $('#js_ChangeRecordForm{{ record.id }}').serialize(),
+                      async: true,
+                      beforeSend: function (xhr, settings) {
+                          // 这里需要csrf_token的值，而不是代码
+                          xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                      },
+                      success: function (data) {
+                          if (data.status == 'success') {
+                              window.location.href = "{% url 'record:record_list' %}";
+                              window.alert(data.msg);
+                          } else if (data.status == 'fail') {
+                              window.location.href = "{% url 'record:record_list' %}";
+                              window.alert(data.msg);
+                          }
+                      }
+                  });
+              });
+          })
+      </script>
+    {% endif %}
+  {% endfor %}
+  <!------------------------------------------------ 修改记录 ----------------------------------------------------------->
+
+
+
+
+
+  <!------------------------------------------------ 查询导出记录 ------------------------------------------------------->
+  <!-- 搜索记录时间选择器 -->
+  <script>
+      $('#datetimepicker_search1').datetimepicker({
+          format: 'YYYY-MM-DD HH:mm',
+          locale: moment.locale('zh-cn')
+      });
+
+      $('#datetimepicker_search2').datetimepicker({
+          format: 'YYYY-MM-DD HH:mm',
+          locale: moment.locale('zh-cn')
+      });
+  </script>
+
+  <!-- 搜索地区选择 -->
+  <script>
+      $(function () {
+          //获取所有省份
+          $.get('/province/', function (dic) {
+              pro = $('#pro_search');
+              $.each(dic.data, function (index, item) {
+                  pro.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+              })
+          });
+          //获取市信息
+          $('#pro_search').change(function () {
+              $.get('/city_' + $(this).val() + '/', function (dict) {
+                  city = $('#city_search');
+                  city.empty().append('<option value="">请选择市</option>');
+                  $('#area_search').empty().append('<option value="">请选择区县</option>');
+                  $.each(dict.data, function (index, item) {
+                      city.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              });
+          });
+
+          //获取区县信息
+          $('#city_search').change(function () {
+              $.get('/area_' + $(this).val() + '/', function (dict) {
+                  county = $('#area_search');
+                  county.empty().append('<option value="">请选择区县</option>');
+                  $.each(dict.data, function (index, item) {
+                      county.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              })
+          });
+      })
+  </script>
+  <!------------------------------------------------ 查询导出记录 ------------------------------------------------------->
+{% endblock other_js %}

@@ -1,0 +1,586 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}
+  {{ content_title }}
+{% endblock title %}
+
+{% block other_css %}
+
+  <!-- 弹框详情css -->
+  <style>
+    .popover-title {
+      color: #003366;
+      font-weight: bolder;
+    }
+
+    .popover {
+      background-color: #104E8B;
+      color: white;
+    }
+  </style>
+
+{% endblock other_css %}
+
+
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder">
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;">
+              <a href="" style="font-size: 18px;">&nbsp;&nbsp;{{ content_title|safe }}</a>
+            </div>
+          </div>
+          <div class="panel-body" style="height: 745px;">
+
+            <div id="editable_wrapper" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
+              <div class="row">
+                <div class="col-sm-12">
+
+                  <a class="btn btn-sm btn-default btn-add" data-toggle="modal" data-target="#AddDeployModal"
+                     data-backdrop='static'>
+                    <i class="fa fa-plus"></i> 创建记录
+                  </a>
+
+                  <form class="navbar-form pull-right " role="search" style="margin-top: 0;">
+                    <div class="form-group">
+                      <span>共 <b style="color: orangered">{{ deploy_nums }}</b> 条&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                      <div class="input-group">
+                        <input type="text" name="keywords"
+                               class="form-control input-sm bg-light no-border rounded "
+                               placeholder="关键词搜索" style="width: 150px;">
+                        <span class="input-group-btn">
+                        <button type="submit" class="btn btn-sm bg-auto rounded"><i class="fa fa-search"></i></button>
+                      </span>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+              </div>
+
+              <div class="row" style="overflow-y: auto; height: 630px;">
+                <div class="col-sm-12">
+
+                  <table class="table table-striped table-bordered table-hover dataTable no-footer" id="editable"
+                         role="grid">
+
+                    <!-- 标题行 -->
+                    <thead>
+                    <tr role="row">
+                      <th class="text-center" rowspan="1" colspan="1" style="width: 5%;">ID</th>
+                      <th class="text-center" rowspan="1" colspan="1">地区</th>
+                      <th class="text-center" rowspan="1" colspan="1">服务名称</th>
+                      <th class="text-center" rowspan="1" colspan="1">Tag地址</th>
+                      <th class="text-center" rowspan="1" colspan="1">发布时间</th>
+                      <th class="text-center" rowspan="1" colspan="1">发布者</th>
+                      <th class="text-center" rowspan="1" colspan="1">备注</th>
+                      <th class="text-center" rowspan="1" colspan="1">创建时间</th>
+                      <th class="text-center" rowspan="1" colspan="1">操作</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for deploy in deploys.object_list %}
+                      <tr class="gradeX odd" role="row">
+                        <td class="text-center" style="vertical-align : middle;">{{ forloop.counter }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          {{ deploy.pro.name }}{{ deploy.city.name }}{{ deploy.area.name }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ deploy.service.name }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          {% if deploy.tag_address %}
+                            <button style="color: #104E8B; border: none; background:none" title="Tag 地址"
+                                    data-container="body" data-toggle="popover" data-trigger="hover"
+                                    data-placement="top" data-content="{{ deploy.tag_address }}">
+                              {{ deploy.tag_address|slice:'10' }}...
+                            </button>
+                          {% else %}
+                            暂无
+                          {% endif %}
+                        </td>
+                        <td class="text-center" style="vertical-align : middle;">{{ deploy.deploy_time }}</td>
+                        <td class="text-center" style="vertical-align : middle;">{{ deploy.add_user.nick_name }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          {% if deploy.ps %}
+                            <button style="color: #104E8B; border: none; background:none" title="备注"
+                                    data-container="body" data-toggle="popover" data-trigger="hover"
+                                    data-placement="top" data-content="{{ deploy.ps }}">
+                              {{ deploy.ps|slice:'10' }}...
+                            </button>
+                          {% else %}
+                            暂无
+                          {% endif %}
+                        </td>
+                        <td class="text-center" style="vertical-align : middle;">{{ deploy.add_time }}</td>
+                        <td class="text-center" style="vertical-align : middle;">
+                          <a class="btn btn-xs btn-primary" data-toggle="modal"
+                             data-target="#EditDeployModal{{ deploy.id }}"
+                             data-backdrop='static'>编辑</a>
+                          <a class="btn btn-xs btn-danger" data-toggle="modal"
+                             data-target="#DeleteDeployModal{{ deploy.id }}"
+                             data-backdrop='static'>删除</a>
+                        </td>
+                      </tr>
+                    {% empty %}
+                      <tr>
+                        <td colspan="9" style="text-align: center;">暂无记录！</td>
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- 页码 -->
+            <div class="row">
+              <div class="col-md-12 text-center">
+                <ul class="pagination" style="margin-top: 0px;">
+                  <!-- 上一页 -->
+                  {% if deploys.has_previous %}
+                    <li class="long"><a href="?{{ deploys.previous_page_number.querystring }}">上一页</a></li>
+                  {% endif %}
+                  <!-- 页码 -->
+                  {% for page in deploys.pages %}
+                    {% if page %}
+                      {% ifequal page deploys.number %}
+                        <li class="active"><a href="?page={{ page }}">{{ page }}<span
+                                class="sr-only">(current)</span></a></li>
+                      {% else %}
+                        <li><a href="?{{ page.querystring }}">{{ page }}<span class="sr-only"></span></a></li>
+                      {% endifequal %}
+                    {% else %}
+                      <li><a href="">...<span class="sr-only"></span></a></li>
+                    {% endif %}
+                  {% endfor %}
+                  <!-- 下一页 -->
+                  {% if deploys.has_next %}
+                    <li><a href="?{{ deploys.next_page_number.querystring }}">下一页<span class="sr-only"></span></a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+  <link rel="stylesheet" href="{% static 'bootstrap_date/bootstrap-select.css' %}" type="text/css">
+  <script src="{% static 'bootstrap_date/bootstrap-select.js' %}"></script>
+
+  <script src="{% static 'bootstrap_date/moment-with-locales.min.js' %}"></script>
+  <link href="{% static 'bootstrap_date/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+  <script src="{% static 'bootstrap_date/bootstrap-datetimepicker.min.js' %}"></script>
+
+  <!-- 下拉选择框 -->
+  <script type="text/javascript">
+      $(window).on('load', function () {
+          $('.selectpicker').selectpicker({
+              'selectedText': 'cat'
+          });
+      })
+  </script>
+
+  <!-- 记录详情 -->
+  <script>
+      $(function () {
+          $("[data-toggle='popover']").popover();
+      });
+  </script>
+
+  <!-- 添加任务 -->
+  <div class="modal inmodal" id="AddDeployModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog " style="padding-top: 5%;">
+      <div class="modal-content">
+        <div class="modal-header" style="min-height: 65px; background-color: #003366;">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                  style="margin-top: 8px; color: white;">x
+          </button>
+          <h4 class="control-label col-sm-6" id="addModalLabel" style="color: white;">新增记录</h4>
+        </div>
+        <form class="form-horizontal" id="js_AddDeployForm">
+          <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">地区选择</label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="pro_add" class="form-control" name="pro">
+                  <option value="">请选择省</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label"></label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="city_add" class="form-control" name="city">
+                  <option value="">请选择市</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label"></label>
+              <div class="col-sm-8 col-lg-8">
+                <select id="area_add" class="form-control" name="area">
+                  <option value="">请选择区县</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">服务名称</label>
+              <div class="col-sm-8 col-lg-8">
+                <select name="service" class="selectpicker form-control">
+                  {% for service in services %}
+                    <option value="{{ service.id }}">{{ service.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group ">
+              <label class="col-sm-3 col-lg-3 control-label">发布时间</label>
+              <div class="col-sm-8 col-lg-8">
+                <div class="input-group date" id='datetimepicker_add1'>
+                  <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                  <input name="deploy_time" type="text" class="form-control" value="">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">Tag地址</label>
+              <div class="col-sm-8 col-lg-8">
+                <input type="text" name="tag_address" class="form-control" placeholder="输入 Tag 地址（非必需）"
+                       maxlength="255">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="col-sm-3 col-lg-3 control-label">备注</label>
+              <div class="col-sm-8 col-lg-8">
+                <textarea class="form-control" name="ps" rows="3" placeholder="备注信息..."></textarea>
+              </div>
+            </div>
+
+            <div class="modal-footer" style="padding-right: 35px;">
+              <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;"
+                      id="js_AddDeployBtn" formaction="">创建
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加记录时间选择器 -->
+  <script>
+      $('#datetimepicker_add1').datetimepicker({
+          format: 'YYYY-MM-DD HH:mm',
+          locale: moment.locale('zh-cn')
+      });
+  </script>
+
+  <!-- 添加记录地区选择 -->
+  <script>
+      $(function () {
+          //获取所有省份
+          $.get('/province/', function (dic) {
+              pro = $('#pro_add');
+              $.each(dic.data, function (index, item) {
+                  pro.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+              })
+          });
+          //获取市信息
+          $('#pro_add').change(function () {
+              $.get('/city_' + $(this).val() + '/', function (dict) {
+                  city = $('#city_add');
+                  city.empty().append('<option value="">请选择市</option>');
+                  $('#area_add').empty().append('<option value="">请选择区县</option>');
+                  $.each(dict.data, function (index, item) {
+                      city.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              });
+          });
+
+          //获取区县信息
+          $('#city_add').change(function () {
+              $.get('/area_' + $(this).val() + '/', function (dict) {
+                  county = $('#area_add');
+                  county.empty().append('<option value="">请选择区县</option>');
+                  $.each(dict.data, function (index, item) {
+                      county.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                  })
+              })
+          });
+      })
+  </script>
+
+  <!-- 添加任务提交 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#js_AddDeployBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'online_deploy:add_deploy' %}",
+                  data: $('#js_AddDeployForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'online_deploy:deploy_list' %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.location.href = "{% url 'online_deploy:deploy_list' %}";
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  {% for deploy in deploys.object_list %}
+    <!-- 修改任务 -->
+    <div class="modal inmodal" id="EditDeployModal{{ deploy.id }}" tabindex="-1" role="dialog"
+         aria-hidden="true">
+      <div class="modal-dialog " style="padding-top: 10%;">
+        <div class="modal-content">
+          <div class="modal-header" style="min-height: 65px; background-color: #003366;">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                    style="margin-top: 8px; color: white;">x
+            </button>
+            <h4 class="control-label col-sm-6" id="addModalLabel" style="color: white;">修改记录</h4>
+          </div>
+          <form class="form-horizontal" id="js_EditDeployForm{{ deploy.id }}">
+            <div class="modal-body" style="padding: 0;padding-top: 10px;">
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">地区选择</label>
+                <div class="col-sm-8 col-lg-8">
+                  <select id="pro_change_{{ deploy.id }}" class="form-control" name="pro">
+                    <option value="{{ deploy.pro.id }}">{{ deploy.pro.name }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label"></label>
+                <div class="col-sm-8 col-lg-8">
+                  <select id="city_change_{{ deploy.id }}" class="form-control" name="city">
+                    <option value="{{ deploy.city.id }}">{{ deploy.city.name }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label"></label>
+                <div class="col-sm-8 col-lg-8">
+                  <select id="area_change_{{ deploy.id }}" class="form-control" name="area">
+                    <option value="{{ deploy.area.id }}">{{ deploy.area.name }}</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">服务名称</label>
+                <div class="col-sm-8 col-lg-8">
+                  <select name="service" class="selectpicker form-control">
+                    {% for service in services %}
+                      <option value="{{ service.id }}"
+                              {% ifequal deploy.service.id service.id %}selected{% endifequal %}>{{ service.name }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group ">
+                <label class="col-sm-3 col-lg-3 control-label">发布时间</label>
+                <div class="col-sm-8 col-lg-8">
+                  <div class="input-group date" id='datetimepicker_add_{{ deploy.id }}'>
+                  <span class="input-group-addon">
+                    <i class="fa fa-calendar"></i>
+                  </span>
+                    <input name="deploy_time" type="text" class="form-control" value="{{ deploy.deploy_time }}">
+                  </div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">Tag地址</label>
+                <div class="col-sm-8 col-lg-8">
+                  <input type="text" name="tag_address" class="form-control" placeholder="输入 Tag 地址（非必需）"
+                         maxlength="255"
+                         value="{% ifnotequal deploy.tag_address None %}{{ deploy.tag_address }}{% endifnotequal %}">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="col-sm-3 col-lg-3 control-label">备注</label>
+                <div class="col-sm-8 col-lg-8">
+                  <textarea class="form-control" name="ps" rows="3"
+                            placeholder="备注信息...">{% ifnotequal deploy.ps None %}{{ deploy.ps }}{% endifnotequal %}</textarea>
+                </div>
+              </div>
+
+              <div class="modal-footer" style="padding-right: 35px;">
+                <button style="width: 60px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white;"
+                        id="js_EditDeployBtn{{ deploy.id }}" formaction="">修改
+                </button>
+              </div>
+
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 修改记录地区选择 -->
+    <script>
+        $(function () {
+            //获取所有省份
+            $.get('/province/', function (dic) {
+                pro = $('#pro_change_{{ deploy.id }}');
+                $.each(dic.data, function (index, item) {
+                    pro.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                })
+            });
+            //获取市信息
+            $('#pro_change_{{ deploy.id }}').change(function () {
+                $.get('/city_' + $(this).val() + '/', function (dict) {
+                    city = $('#city_change_{{ deploy.id }}');
+                    city.empty().append('<option value="">请选择市</option>');
+                    $('#area_change_{{ deploy.id }}').empty().append('<option value="">请选择区县</option>');
+                    $.each(dict.data, function (index, item) {
+                        city.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                    })
+                });
+            });
+
+            //获取区县信息
+            $('#city_change_{{ deploy.id }}').change(function () {
+                $.get('/area_' + $(this).val() + '/', function (dict) {
+                    county = $('#area_change_{{ deploy.id }}');
+                    county.empty().append('<option value="">请选择区县</option>');
+                    $.each(dict.data, function (index, item) {
+                        county.append('<option value=' + item[0] + '>' + item[1] + '</option>');
+                    })
+                })
+            });
+        })
+    </script>
+
+    <!-- 添加记录时间选择器 -->
+    <script>
+        $('#datetimepicker_add_{{deploy.id }}').datetimepicker({
+            format: 'YYYY-MM-DD HH:mm',
+            locale: moment.locale('zh-cn')
+        });
+    </script>
+
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_EditDeployBtn{{ deploy.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'online_deploy:change_deploy' deploy.id %}",
+                    data: $('#js_EditDeployForm{{ deploy.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'online_deploy:deploy_list' %}";
+                            window.alert(data.msg);
+                        } else if (data.status == 'fail') {
+                            window.location.href = "{% url 'online_deploy:deploy_list' %}";
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+
+    <!-- 删除记录 -->
+    <div class="modal fade" id="DeleteDeployModal{{ deploy.id }}" tabindex="-1" role="dialog"
+         aria-hidden="true">
+      <div class="modal-dialog modal-sm" style="padding-top: 10%">
+        <div class="modal-content">
+          <div class="modal-header" style="background-color: #003366; color: white;">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true" style="color: white">&times;</span>
+            </button>
+            <h4 class="modal-title">是否删除该记录？</h4>
+          </div>
+          <form class="form-horizontal" id="js_deleteDeployForm{{ deploy.id }}">
+            <div class="modal-body" style="height: 50px;">
+              <div class="col-sm-6">
+                <input type="button" id="js_deleteDeployBtn{{ deploy.id }}"
+                       style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;"
+                       value="确定">
+              </div>
+              <div class="col-sm-6">
+                <button style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;">
+                  取消
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 删除 -->
+    <script>
+        $(function () {
+            // 提交表单
+            $('#js_deleteDeployBtn{{ deploy.id }}').on('click', function () {
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url: "{% url 'online_deploy:delete_deploy' deploy.id %}",
+                    data: $('#js_deleteDeployForm{{ deploy.id }}').serialize(),
+                    async: true,
+                    beforeSend: function (xhr, settings) {
+                        // 这里需要csrf_token的值，而不是代码
+                        xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                    },
+                    success: function (data) {
+                        if (data.status == 'success') {
+                            window.location.href = "{% url 'online_deploy:deploy_list' %}";
+                        } else if (data.status == 'fail') {
+                            window.alert(data.msg);
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+  {% endfor %}
+{% endblock other_js %}

@@ -1,0 +1,107 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+{% block title %}
+  用户反馈
+{% endblock title %}
+
+
+<!-- 中间内容主体 -->
+{% block center_content %}
+  <div class="col">
+    <p style="height: 2px;"></p>
+    <!-- 中间栏 -->
+    <div class="padder" style="overflow-y: auto;">
+
+
+      <div class="alert alert-success alert-dismissible fade in" id="id_SubmitSuccess" role="alert"
+           style="display: none;">
+        {#              <button type="button" class="close" id="id_SuccessClose" data-dismiss="alert" aria-label="Close">#}
+        {#                <span aria-hidden="true">×</span>#}
+        {#              </button>#}
+        <button type="button" class="close" id="id_SuccessClose">×</button>
+        <h5><strong>提交成功！</strong></h5>
+      </div>
+
+      <div class="alert alert-danger alert-dismissible fade in" id="id_SubmitFail" role="alert"
+           style="display: none;">
+        <button type="button" class="close" id="id_FailClose">×</button>
+        <h5><strong>提交失败！</strong></h5>
+      </div>
+
+
+      <!-- 用户反馈 -->
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+              <span>&nbsp;&nbsp;用户反馈</span>
+            </div>
+          </div>
+          <div class="panel-body">
+            <form action="" method="post" id="id_jsFeedbackForm">
+                    <textarea class="form-control no-border" id="id_message" name="message" rows="21"
+                              style="line-height: 30px;"
+                              placeholder="说说给你带来的不便之处（至少 10 个字符） ..."></textarea>
+              <hr>
+              <input type="button" class="pull-right" id="id_jsFeedbackBtn" style="width: 100px;height: 25px;line-height: 25px;text-align: center;background: #003366;border: 0;border-radius: 4px;color: white; margin-right: 15px;" value="提交">
+
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+{% block other_js %}
+  <!-- 提交表单 -->
+  <script>
+      $(function () {
+          $('#id_jsFeedbackBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'message:feedback_message' %}",
+                  data: $('#id_jsFeedbackForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      // 这里需要csrf_token的值，而不是代码
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          $('#id_jsFeedbackForm')[0].reset();
+                          document.getElementById("id_message").setAttribute("rows", "18");
+                          document.getElementById("id_SubmitSuccess").style.display = "block";
+                          document.getElementById("id_SubmitFail").style.display = "none";
+                      } else if (data.status == 'fail') {
+                          document.getElementById("id_message").setAttribute("rows", "18");
+                          document.getElementById("id_SubmitSuccess").style.display = "none";
+                          document.getElementById("id_SubmitFail").style.display = "block";
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+
+  <!-- 控制窗口大小 -->
+  <script>
+      $(function () {
+          $('#id_SuccessClose').on('click', function () {
+              document.getElementById("id_SubmitSuccess").style.display = "none";
+              document.getElementById("id_message").setAttribute("rows", "21");
+          })
+      });
+      $(function () {
+          $('#id_FailClose').on('click', function () {
+              document.getElementById("id_SubmitFail").style.display = "none";
+              document.getElementById("id_message").setAttribute("rows", "21");
+          })
+      });
+  </script>
+{% endblock other_js %}

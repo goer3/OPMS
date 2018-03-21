@@ -1,0 +1,426 @@
+{% extends 'web_base.html' %}
+{% load staticfiles %}
+
+
+<!----------------------------------------------------- 标题 ----------------------------------------------------------->
+{% block title %}
+  个人信息
+{% endblock title %}
+
+
+<!----------------------------------------------------- 其他css -------------------------------------------------------->
+{% block other_css %}
+  <script src="{% static 'bootstrap_date/jquery-2.1.1.js' %}"></script>
+{% endblock other_css %}
+
+
+<!----------------------------------------------------- 内容主体 -------------------------------------------------------->
+{% block center_content %}
+  <div class="col">
+    <p style="padding-top: 2px;"></p>
+
+    <!-- 中间栏 -->
+    <div class="padder">
+      <div>
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <div style="border-left: 4px solid #003366; margin-bottom: 10px; margin-top: 10px; height: 25px;font-size: 18px;">
+              <span>&nbsp;&nbsp;个人信息</span>
+            </div>
+          </div>
+
+          <div class="panel-body" style="text-align: center; height: 745px;">
+            <div class="col-sm-5">
+              <div class="col-sm-4"></div>
+              <div class="col-sm-8" style="margin-top: 25%">
+                <div class="ibox float-e-margins">
+                  <div class="ibox-content">
+
+
+                    <!------------------------------------- ------- 用户头像开始 ---------------------------------------->
+                    <form class="clearfix" id="jsAvatarForm" enctype="multipart/form-data" autocomplete="off"
+                          method="post" action="{% url 'users:change_avatar' %}">
+                      {% csrf_token %}
+                      <label class="changearea" for="avatarUp">
+                        <span id="avatardiv" class="pic">
+                          <img width="150" height="150" class="js-img-show img-circle" id="avatarShow"
+                               src="{{ MEDIA_URL }}{{ request.user.avatar }}" title="点击修改头像"/>
+                        </span><br>
+                        <span class="fl upload-inp-box" style="margin-left:70px;">
+                          <input type="file" name="avatar" id="avatarUp" class="js-img-up" style="display: none"/>
+                        </span>
+                      </label><br>
+
+                      <label>
+                        <span class="fl upload-inp-box" style="margin-left:70px;">
+                        </span>
+                        <input type="submit"
+                               style="width: 150px;height: 30px;line-height: 30px;text-align: center; display:block;background: #363f44;border: 0;border-radius: 4px;color: white;"
+                               id="jsAvatarBtn" value="保存头像">
+                      </label>
+                      <br><br>
+                    </form>
+                    <!--------------------------------------------- 用户头像结束 ---------------------------------------->
+
+
+                    <div>
+                      <label class="text-center">
+
+                        <!----------------------------------------- 修改密码开始 ---------------------------------------->
+                        <a href="#ChangePasswordForm" data-toggle="modal"
+                           style="width: 150px;height: 30px;line-height: 30px;text-align: center; display:block;background: #363f44;border: 0;border-radius: 4px;color: white; margin-bottom: 15%;">修改密码</a>
+
+                        <!-- 密码表单 -->
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1"
+                             id="ChangePasswordForm" class="modal fade" style="display: none;">
+                          <div class="modal-dialog" style="width: 400px;">
+                            <div class="modal-content">
+                              <div class="modal-header bg-black" style="color: white">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                                        style="color: white">×
+                                </button>
+                                <h4 class="modal-title">修改用户密码</h4>
+
+                              </div>
+
+                              <form action="" id="id_UserChangePwdForm">
+                                <div class="modal-body">
+                                  <input type="password" name="password1" placeholder="新密码" class="form-control"
+                                         required=""
+                                         maxlength="16" style="margin-bottom: 10px;">
+                                  <input type="password" name="password2" placeholder="重复密码" class="form-control"
+                                         required="" maxlength="16">
+                                </div>
+                                <div class="modal-footer" style="color: #fff;">
+                                  <button data-dismiss="modal"
+                                          style="width: 60px;height: 30px;line-height: 30px;text-align: center;background: #363f44;border: 0;border-radius: 4px;color: white;"
+                                          type="button">取消
+                                  </button>
+                                  <input style="width: 60px;height: 30px;line-height: 30px;text-align: center;background: #363f44;border: 0;border-radius: 4px;color: white;"
+                                         type="button" id="id_UserChangePwdBtn" value="修改">
+                                </div>
+                              </form>
+
+                            </div>
+                          </div>
+                        </div>
+                        <!----------------------------------------- 修改密码结束 ---------------------------------------->
+
+
+                        <!----------------------------------------- 修改邮箱开始 ---------------------------------------->
+                        <a href="#ChangeEmail" data-toggle="modal"
+                           style="width: 150px;height: 30px;line-height: 30px;text-align: center; display:block;background: #363f44;border: 0;border-radius: 4px;color: white;">修改邮箱</a>
+
+                        <!-- 邮箱表单 -->
+                        <div aria-hidden="true" aria-labelledby="myModalLabel" role="dialog" tabindex="-1"
+                             id="ChangeEmail" class="modal fade" style="display: none;">
+                          <div class="modal-dialog" style="width: 400px;">
+                            <div class="modal-content">
+                              <div class="modal-header bg-black" style="color: white">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
+                                        style="color: white">×
+                                </button>
+                                <h4 class="modal-title">修改用户绑定邮箱</h4>
+                              </div>
+                              <form action="" method="post" id="id_ChangeEmailForm">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                  <input type="email" name="email" placeholder="修改的邮箱" autocomplete="off"
+                                         class="form-control placeholder-no-fix" maxlength="20"
+                                         style="margin-bottom: 10px;" required="">
+                                  <input type="text" name="code" placeholder="验证码" autocomplete="off"
+                                         class="form-control placeholder-no-fix pull-left"
+                                         style="width: 70%; display: inline" maxlength="4">
+                                  <input type="button" class="btn pull-right" style="display: inline; height: 33px;"
+                                         id="id_GetEmailCodeBtn" value="获取验证码">
+                                </div>
+                                <br><br>
+                                <div class="modal-footer" style="color: #fff;">
+                                  <button data-dismiss="modal"
+                                          style="width: 60px;height: 30px;line-height: 30px;text-align: center;background: #363f44;border: 0;border-radius: 4px;color: white;"
+                                          type="button">取消
+                                  </button>
+                                  <input style="width: 60px;height: 30px;line-height: 30px;text-align: center;background: #363f44;border: 0;border-radius: 4px;color: white;"
+                                         type="button" formaction="" value="修改" id="id_ChangeEmailBtn">
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+                        <!----------------------------------------- 修改邮箱结束 ---------------------------------------->
+
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <!----------------------------------------------------- 用户资料开始 ---------------------------------------->
+            <div class="col-sm-7">
+              <div class="col-sm-8">
+                <div class="ibox float-e-margins">
+                  <div class="ibox-content" style="padding-top: 20px;">
+                    <form method="post" class="form-horizontal" action="{% url 'users:user_info' %}"
+                          enctype="multipart/form-data">
+                      {% csrf_token %}
+
+                      <!-- 用户名 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_username">用户名</label>
+                        <div class="col-md-9">
+                          <input type="text" name="username" value="{{ request.user.username }}" maxlength="20"
+                                 class="form-control"
+                                 placeholder="用户名" readonly="readonly" required="" id="id_username">
+                        </div>
+                      </div>
+
+                      <!-- 名字 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_nick_name">姓名</label>
+                        <div class="col-md-9">
+                          <input type="text" name="nick_name" value="{{ request.user.nick_name }}" maxlength="20"
+                                 class="form-control"
+                                 placeholder="名称" required="" id="id_nick_name" readonly="readonly">
+                        </div>
+                      </div>
+
+                      <!-- 邮箱 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_email">邮箱</label>
+                        <div class="col-md-9">
+                          <input type="email" name="email" readonly="readonly" value="{{ request.user.email }}"
+                                 maxlength="30"
+                                 class="form-control"
+                                 placeholder="邮件" required="" id="id_email">
+                        </div>
+                      </div>
+
+                      <!-- 地址 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_address">地址</label>
+                        <div class="col-md-9">
+                          <input type="text" name="address" value="{{ request.user.address }}" maxlength="50"
+                                 class="form-control"
+                                 placeholder="地址" required="" id="id_address">
+                        </div>
+                      </div>
+
+                      <div class="form-group" id="date_5">
+                        <label for="id_date_expired" class="col-sm-2 control-label">生日</label>
+                        <div class="col-sm-9">
+                          <div class="input-group date" id='date1'>
+                          <span class="input-group-addon">
+                            <i class="fa fa-calendar"></i>
+                          </span>
+                            <input type="text" name="birthday" class="form-control" value="{{ request.user.birthday }}">
+                          </div>
+                        </div>
+                      </div>
+
+
+                      <!-- 性别 -->
+                      <div class="form-group">
+                        <label class="col-sm-2 control-label">性别</label>
+                        <div class="col-sm-3" style="padding-top: 5px;">
+                          <input type="radio" name="gender" value="male"
+                                 {% ifequal request.user.gender 'male' %}checked{% endifequal %}>男&nbsp;&nbsp;&nbsp;&nbsp;
+                          <input type="radio" name="gender" value="female"
+                                 {% ifequal request.user.gender 'female' %}checked{% endifequal %}>女
+                        </div>
+                      </div>
+
+                      <!-- 手机 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_mobile">手机</label>
+                        <div class="col-md-9">
+                          <input type="text" name="mobile" maxlength="20" class="form-control" placeholder="手机"
+                                 id="id_mobile" value="{{ request.user.mobile }}">
+                        </div>
+                      </div>
+
+                      <!-- QQ -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_qq">QQ</label>
+                        <div class="col-md-9">
+                          <input type="text" name="qq" maxlength="20" class="form-control" placeholder="QQ号码"
+                                 id="id_qq" value="{{ request.user.qq }}">
+                        </div>
+                      </div>
+
+                      <!-- 微信 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_wechat">微信</label>
+                        <div class="col-md-9">
+                          <input type="text" name="wechat" maxlength="30" class="form-control" placeholder="微信"
+                                 title="" id="id_wechat" value="{{ request.user.wechat }}">
+                        </div>
+                      </div>
+
+                      <!-- 部门 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_department">部门</label>
+                        <div class="col-md-9">
+                          <input type="text" name="department" readonly="readonly"
+                                 value="{{ request.user.department.name }}" maxlength="50"
+                                 class="form-control"
+                                 placeholder="部门" required="" id="id_department">
+                        </div>
+                      </div>
+
+                      <!-- 职位 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_position">职位</label>
+                        <div class="col-md-9">
+                          <input type="text" name="position" readonly="readonly"
+                                 value="{{ request.user.position.name }}" maxlength="50"
+                                 class="form-control"
+                                 placeholder="职位" required="" id="id_position">
+                        </div>
+                      </div>
+
+                      <!-- 备注 -->
+                      <div class="form-group">
+                        <label class="col-md-2 control-label" for="id_desc">其他</label>
+                        <div class="col-md-9">
+                          <textarea name="desc" cols="40" rows="4" maxlength="200" class="form-control" placeholder="备注"
+                                    id="id_desc">{{ request.user.desc }}</textarea>
+                        </div>
+                      </div>
+
+                      <!-- 按钮 -->
+                      <div class="form-group">
+                        <div class="col-sm-8 col-sm-offset-2">
+                          <button type="reset"
+                                  style="width: 100px;height: 30px;line-height: 30px;text-align: center;background: #363f44;border: 0;border-radius: 4px;color: white; ">
+                            重置
+                          </button>
+                          <button id="submit_button" type="submit"
+                                  style="width: 100px;height: 30px;line-height: 30px;text-align: center;background: #363f44;border: 0;border-radius: 4px;color: white; ">
+                            提交
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!----------------------------------------------------- 用户资料结束 ---------------------------------------->
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock center_content %}
+
+
+<!----------------------------------------------------- 其他js --------------------------------------------------------->
+{% block other_js %}
+  <script src="{% static 'bootstrap_date/moment-with-locales.min.js' %}"></script>
+  <link href="{% static 'bootstrap_date/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+  <script src="{% static 'bootstrap_date/bootstrap-datetimepicker.min.js' %}"></script>
+
+  <script>
+      $(function () {
+          $('#date1').datetimepicker({
+              format: 'YYYY-MM-DD',
+              locale: moment.locale('zh-cn')
+          });
+      });
+  </script>
+
+  <!-- 修改密码 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#id_UserChangePwdBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'users:change_password' %}",
+                  data: $('#id_UserChangePwdForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'users:login' %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  <!-- 发送邮箱验证码 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#id_GetEmailCodeBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'users:send_change_email_code' %}",
+                  data: $('#id_ChangeEmailForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+  <!-- 验证邮箱验证码 -->
+  <script>
+      $(function () {
+          // 提交表单
+          $('#id_ChangeEmailBtn').on('click', function () {
+              $.ajax({
+                  cache: false,
+                  type: "POST",
+                  url: "{% url 'users:change_email' %}",
+                  data: $('#id_ChangeEmailForm').serialize(),
+                  async: true,
+                  beforeSend: function (xhr, settings) {
+                      xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
+                  },
+                  success: function (data) {
+                      if (data.status == 'success') {
+                          window.location.href = "{% url 'users:user_info' %}";
+                          window.alert(data.msg);
+                      } else if (data.status == 'fail') {
+                          window.alert(data.msg);
+                      }
+                  }
+              });
+          });
+      })
+  </script>
+
+
+  <!-- 修改个人资料状态 -->
+  <script type="text/javascript">
+      var change_info_status = {{ change_info_status|safe }};
+      if (change_info_status == 'success') {
+          alert('个人资料修改成功!');
+      } else if (change_info_status == 'fail') {
+          alert('个人资料修改失败!');
+      }
+  </script>
+{% endblock other_js %}
