@@ -85,25 +85,25 @@ python manage.py createsuperuser
 ### 示例图片
 
 ### 首页
-![index](https://github.com/PythonTra1nee/OPMS/blob/master/display/index.png
+![index](https://github.com/PythonTra1nee/OPMS/blob/master/display/index.png)
 
 ### 主机
-![host](https://github.com/PythonTra1nee/OPMS/blob/master/display/host.png
+![host](https://github.com/PythonTra1nee/OPMS/blob/master/display/host.png)
 
 ### 记录
-![record](https://github.com/PythonTra1nee/OPMS/blob/master/display/record.png
+![record](https://github.com/PythonTra1nee/OPMS/blob/master/display/record.png)
 
 ### 添加记录
-![addrecord](https://github.com/PythonTra1nee/OPMS/blob/master/display/addrecord.png
+![addrecord](https://github.com/PythonTra1nee/OPMS/blob/master/display/addrecord.png)
 
 ### 任务
-![task](https://github.com/PythonTra1nee/OPMS/blob/master/display/task.png
+![task](https://github.com/PythonTra1nee/OPMS/blob/master/display/task.png)
 
 ### 用户信息
-![userinfo](https://github.com/PythonTra1nee/OPMS/blob/master/display/userinfo.png
+![userinfo](https://github.com/PythonTra1nee/OPMS/blob/master/display/userinfo.png)
 
 ### 用户消息
-![usermessage](https://github.com/PythonTra1nee/OPMS/blob/master/display/usermessage.png
+![usermessage](https://github.com/PythonTra1nee/OPMS/blob/master/display/usermessage.png)
 
 
 
