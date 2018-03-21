@@ -81,3 +81,5 @@ python manage.py createsuperuser
 【5】执行 sql 目录下的地区 SQL：依次为 province --> city --> area
 
 【6】启动登录服务访问
+
+【7】webssh 服务的启动方式：python ....../webssh/main.py
